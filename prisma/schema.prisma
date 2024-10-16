@@ -56,7 +56,7 @@ datasource db {
 
 model Comment {
   id     String @id @default(uuid())
-  body   String @db.Text() // TODO: See how used in repo
+  body   String @db.Text()
   user   User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   userId String @map("user_id")
 
@@ -110,13 +110,13 @@ enum PostType {
 
 model Post {
   id         String   @id @default(uuid())
-  body       String   @db.Text() // TODO: Check how used in program
-  bodyData   Json?    @map("body_data") @db.JsonB() // TODO: Check how used in program
+  body       String   @db.Text()
+  // bodyData   Json?    @map("body_data") @db.JsonB()
   postType   PostType @default(DEFAULT)
   user       User     @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   userId     String   @map("user_id")
-  published  Boolean  @default(true) @map("published") // TODO: consider drafts feature?
-  isRichText Boolean  @default(false) @map("is_rich_text") // TODO: Check how used in program
+  // published  Boolean  @default(true) @map("published")
+  // isRichText Boolean  @default(false) @map("is_rich_text")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
@@ -165,7 +165,7 @@ model User {
   name          String
   email         String    @unique
   username      String    @unique
-  emailVerified DateTime? @map("email_verified")
+  // emailVerified DateTime? @map("email_verified")
   image         String?
   headline      String?
   bio           String?   @db.Text
