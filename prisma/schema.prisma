@@ -1,0 +1,188 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// model Address {
+//   id           String   @id @default(uuid())
+//   unitNumber   String?  @map("unit_number")
+//   streetNumber String?  @map("street_number")
+//   streetName   String?  @map("street_name")
+//   suburbName   String?  @map("suburb_name")
+//   stateName    String?  @map("state_name")
+//   country      Country? @relation(fields: [countryId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+//   countryId    String?  @map("country_id")
+
+//   createdAt DateTime @default(now()) @map("created_at")
+//   updatedAt DateTime @default(now()) @map("updated_at")
+
+//   @@map("addresses")
+// }
+
+// TODO: See what fields we need for this model
+// model Attachment {
+//   id               String  @id @default(uuid())
+//   fileExtension    String? @map("file_extension")
+//   fileKey          String  @map("file_key")
+//   filename         String
+//   originalFilename String  @map("original_filename")
+//   user             User?   @relation(fields: [userId], references: [id])
+//   userId           String? @map("user_id")
+//   title            String?
+//   description      String? @db.Text()
+//   width            Int?
+//   height           Int?
+
+//   createdAt DateTime @default(now()) @map("created_at")
+//   updatedAt DateTime @default(now()) @map("updated_at")
+
+//   Post      Post?    @relation(fields: [postId], references: [id])
+//   postId    String?
+//   Comment   Comment? @relation(fields: [commentId], references: [id])
+//   commentId String?
+
+//   @@map("attachments")
+// }
+
+model Comment {
+  id     String @id @default(uuid())
+  body   String @db.Text() // TODO: See how used in repo
+  user   User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  userId String @map("user_id")
+
+  parentCommentId String?   @map("parent_comment_id")
+  parentComment   Comment?  @relation("CommentSubComments", fields: [parentCommentId], references: [id])
+  subComments     Comment[] @relation("CommentSubComments")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  // attachments Attachment[]
+  commentLikes  CommentLike[]
+  postsComments PostComment[]
+
+  @@map("comments")
+}
+
+model CommentLike {
+  id        String  @id @default(uuid())
+  comment   Comment @relation(fields: [commentId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  commentId String  @map("comment_id")
+  user      User    @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  userId    String  @map("user_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@unique([commentId, userId])
+  @@map("comment_likes")
+}
+
+// model Country {
+//   id    String @id @default(uuid())
+//   key   String @unique
+//   title String
+
+//   createdAt DateTime @default(now()) @map("created_at")
+//   updatedAt DateTime @default(now()) @map("updated_at")
+
+//   addresses Address[]
+//   users     User[]
+
+//   @@map("countries")
+// }
+
+enum PostType {
+  DEFAULT
+  EVENT
+  ARTICLE
+}
+
+model Post {
+  id         String   @id @default(uuid())
+  body       String   @db.Text() // TODO: Check how used in program
+  bodyData   Json?    @map("body_data") @db.JsonB() // TODO: Check how used in program
+  postType   PostType @default(DEFAULT)
+  user       User     @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  userId     String   @map("user_id")
+  published  Boolean  @default(true) @map("published") // TODO: consider drafts feature?
+  isRichText Boolean  @default(false) @map("is_rich_text") // TODO: Check how used in program
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  // attachments  Attachment[]
+  postComments PostComment[]
+  postLikes    PostLike[]
+
+  @@map("posts")
+}
+
+model PostComment {
+  id        String  @id @default(uuid())
+  comment   Comment @relation(fields: [commentId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  commentId String  @map("comment_id")
+  post      Post    @relation(fields: [postId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  postId    String  @map("post_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@map("posts_comments")
+}
+
+model PostLike {
+  id     String @id @default(uuid())
+  post   Post   @relation(fields: [postId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  postId String @map("post_id")
+  user   User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  userId String @map("user_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@unique([postId, userId])
+  @@map("post_likes")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  username      String    @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  headline      String?
+  bio           String?   @db.Text
+
+  // country   Country? @relation(fields: [countryId], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  // countryId String?  @map("country_id")
+
+  role UserRole @default(USER)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  // attachments  Attachment[]
+  comments     Comment[]
+  commentLikes CommentLike[]
+  posts        Post[]
+  postLikes    PostLike[]
+
+  @@map("users")
+}
