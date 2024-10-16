@@ -6,6 +6,9 @@ import helmet from 'helmet'
 import morgan from 'morgan'
 import rateLimit from 'express-rate-limit'
 
+// import routes
+import authRoutes from './routes/authRoutes'
+
 // Set up env variables
 dotenv.config()
 
@@ -44,5 +47,8 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }))
 
 // Compression of text sent to clients.
 app.use(compression())
+
+// Set up routes
+app.use('/api/v1/auth', authRoutes)
 
 export default app
