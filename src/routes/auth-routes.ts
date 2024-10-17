@@ -13,6 +13,11 @@ import { authController } from '../controllers/auth-controller'
 // @access  Public
 router.get('/test', authController.test)
 
+// @route   POST api/v1/auth/register
+// @desc    Register user
+// @access  Public
+router.post('/register', authController.register)
+
 // @route   GET api/v1/auth/login
 // @desc    Login User / JWT Response
 // @access  Public

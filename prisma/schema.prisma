@@ -176,7 +176,8 @@ model User {
   name     String
   email    String  @unique
   username String  @unique
-  // emailVerified DateTime? @map("email_verified")
+  password String
+  emailVerified DateTime? @map("email_verified")
   image    String?
   headline String?
   bio      String? @db.Text
