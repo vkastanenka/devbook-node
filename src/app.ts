@@ -1,3 +1,4 @@
+// utils
 import compression from 'compression'
 import cors from 'cors'
 import dotenv from 'dotenv'
@@ -5,6 +6,9 @@ import express from 'express'
 import helmet from 'helmet'
 import morgan from 'morgan'
 import rateLimit from 'express-rate-limit'
+
+// routes
+import userRouter from './routes/user-routes'
 
 // Set up env variables
 dotenv.config()
@@ -44,5 +48,8 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }))
 
 // Compression of text sent to clients.
 app.use(compression())
+
+// Apply routes
+app.use("/api/v1/users", userRouter);
 
 export default app
