@@ -1,10 +1,82 @@
 // utils
 import prisma from '../lib/db'
-import { SignJWT } from 'jose'
+import { SignJWT, jwtVerify } from 'jose'
 import { v4 as uuidv4 } from 'uuid'
+import { catchAsync } from '../lib/catchAsync'
 
 // types
 import { Request, Response, NextFunction } from 'express'
+
+//////////////
+// Middleware
+
+// Privatizes routes and makes accessible only to users with valid jwt session token
+const protect = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const errors: { [key: string]: string } = {}
+
+    // Assigning token based on headers
+    let token
+    if (req.headers.authorization?.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1]
+    }
+
+    // Check if the token exists
+    if (!token) {
+      errors.authentication =
+        'You are not logged in! Please log in to gain access.'
+      return res.status(401).json(errors)
+    }
+
+    // Decode jwt session token
+    const jwtSecret = new TextEncoder().encode(process.env.NEXT_JWT_SECRET)
+    const { payload } = await jwtVerify(token, jwtSecret, {
+      algorithms: ['HS256'],
+    })
+    const decodedJwt = payload as { id: string; expires: string; iat: number }
+
+    // Check if session is expired
+    if (decodedJwt.expires < new Date().toString()) {
+      errors.authentication = 'Access token is expired. Please log in again.'
+      return res.status(401).json(errors)
+    }
+
+    // Find session with user id
+    const session = await prisma.session.findUnique({
+      where: {
+        id: decodedJwt.id,
+      },
+    })
+
+    // Check if the session exists
+    if (!session) {
+      errors.query = 'Error locating session. Please log in again.'
+      return res.status(400).json(errors)
+    }
+
+    // Find user with session data
+    const user = await prisma.user.findUnique({
+      where: {
+        id: session.userId,
+      },
+    })
+
+    // Check if user still exists
+    if (!user) {
+      errors.query = 'The user related to this token no longer exists.'
+      return res.status(401).json(errors)
+    }
+
+    // Check if user changed password after the token was issued TODO
+    // if (await currentUser.changedPasswordAfter(decoded.iat)) {
+    //   errors.changedPassword =
+    //     'User has recently changed their password! Please log in again!'
+    //   return res.status(401).json(errors)
+    // }
+
+    next()
+  }
+)
 
 /////////////////
 // Public Routes
@@ -12,18 +84,14 @@ import { Request, Response, NextFunction } from 'express'
 // @route   GET api/v1/auth/test
 // @desc    Tests auth route
 // @access  Public
-export const test = (req: Request, res: Response, next: NextFunction) => {
+const test = (req: Request, res: Response, next: NextFunction) => {
   res.json({ message: 'Auth route secured' })
 }
 
 // @route   GET api/v1/auth/login
 // @desc    Login User / JWT Response
 // @access  Public
-export const login = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const login = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body
 
   try {
@@ -61,8 +129,8 @@ export const login = async (
     const session = await prisma.session.create({
       data: {
         userId: user.id,
-        sessionToken: uuidv4(),
-        expires: new Date(),
+        sessionToken: uuidv4(), // TODO: Remove
+        expires: new Date().setDate(new Date().getDate() + 1).toString(),
       },
     })
 
@@ -75,10 +143,10 @@ export const login = async (
     }
 
     const jwtSecret = new TextEncoder().encode(process.env.JWT_SECRET)
-    const jwt = await new SignJWT({ id: session.id })
+    const jwt = await new SignJWT({ id: session.id, expires: session.expires })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
-      //   .setExpirationTime('10 sec from now')
+      .setExpirationTime('1 day')
       .sign(jwtSecret)
 
     res.status(200).json(jwt)
@@ -95,7 +163,7 @@ export const login = async (
 // @route   GET api/v1/auth/sessions/:id
 // @desc    Get user session
 // @access  Public
-export const getSessionById = async (
+const getSessionById = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -131,7 +199,7 @@ export const getSessionById = async (
 // @route   DELETE api/v1/auth/sessions/:id
 // @desc    Delete user session
 // @access  Private
-export const deleteSessionById = async (
+const deleteSessionById = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -158,4 +226,12 @@ export const deleteSessionById = async (
       errors: { user: 'Error fetching session' },
     })
   }
+}
+
+export const authController = {
+  protect,
+  test,
+  login,
+  getSessionById,
+  deleteSessionById,
 }
