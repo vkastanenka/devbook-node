@@ -43,7 +43,7 @@ const seedDatabase = async () => {
 
 const main = async () => {
   await deleteDatabase()
-  await seedDatabase()
+  // await seedDatabase()
 }
 
 main()

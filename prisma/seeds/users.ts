@@ -2,13 +2,13 @@ import type { Prisma, PrismaClient } from '@prisma/client'
 
 const users: Prisma.UserCreateArgs['data'][] = [
   {
-    id: 'f1bdf45e-1b1c-11ec-9621-0242ac130002',
-    name: 'Victoria Kastanenka',
-    email: 'vkastanenka@gmail.com',
-    username: 'vkastanenka',
-    image: '/images/avatar-victoria.jpg',
-    headline: 'Software Engineer',
-  },
+    "id": "f1bdf45e-1b1c-11ec-9621-0242ac130002",
+    "name": "Victoria Kastanenka",
+    "email": "vkastanenka@gmail.com",
+    "username": "vkastanenka",
+    "image": "/images/avatar-victoria.jpg",
+    "headline": "Software Engineer",
+  }
 ]
 
 export const seedFn = (prisma: PrismaClient) =>

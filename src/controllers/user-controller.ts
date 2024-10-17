@@ -1,5 +1,11 @@
 // utils
 import prisma from '../lib/db'
+import {
+  createRecord,
+  readRecord,
+  updateRecord,
+  deleteRecord,
+} from '../lib/controllerFactory'
 
 // types
 import { Request, Response, NextFunction } from 'express'
@@ -14,41 +20,22 @@ export const test = (req: Request, res: Response, next: NextFunction) => {
   res.json({ message: 'Users route secured' })
 }
 
-// @route   GET api/v1/users/users/:id
-// @desc    Returns users matching id parameter
+// @route   GET api/v1/users/:id
+// @desc    Gets user matching id
 // @access  Public
-export const getUserById = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const user = await prisma.user.findUnique({
-      where: {
-        id: req.params.id,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        username: true,
-        image: true,
-        headline: true,
-        bio: true,
-      },
-    })
+export const getUser = readRecord(prisma.user)
 
-    if (!user) {
-      res
-        .status(400)
-        .json({ errors: { user: 'No user found with provided id' } })
-    }
+// @route   POST api/v1/users
+// @desc    Creates user
+// @access  Public
+export const postUser = createRecord(prisma.user)
 
-    res.status(200).json(user)
-  } catch (error) {
-    console.log(error)
-    res.status(400).json({
-      errors: { user: 'Error fetching user' },
-    })
-  }
-}
+// @route   PATCH api/v1/users/:id
+// @desc    Updates user matching id
+// @access  Public
+export const updateUser = updateRecord(prisma.user)
+
+// @route   DELETE api/v1/users/:id
+// @desc    Deletes user matching id
+// @access  Public
+export const deleteUser = deleteRecord(prisma.user)
