@@ -54,15 +54,15 @@ const protect = catchAsync(
       return res.status(400).json(errors)
     }
 
-    // Find user with session data
-    const user = await prisma.user.findUnique({
+    // Find current user with session data
+    const currentUser = await prisma.user.findUnique({
       where: {
         id: session.userId,
       },
     })
 
-    // Check if user still exists
-    if (!user) {
+    // Check if current user still exists
+    if (!currentUser) {
       errors.query = 'The user related to this token no longer exists.'
       return res.status(401).json(errors)
     }
@@ -74,6 +74,8 @@ const protect = catchAsync(
     //   return res.status(401).json(errors)
     // }
 
+    // Assign currentUser to req.user to be used in protected route functions
+    req.user = currentUser
     next()
   }
 )
