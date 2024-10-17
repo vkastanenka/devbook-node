@@ -6,7 +6,7 @@ const users: Prisma.UserCreateArgs['data'][] = [
     name: 'Victoria Kastanenka',
     email: 'vkastanenka@gmail.com',
     username: 'vkastanenka',
-    image: '/public/images/avatar-victoria.jpg',
+    image: '/images/avatar-victoria.jpg',
     headline: 'Software Engineer',
   },
 ]

@@ -22,7 +22,7 @@ export const seedFn = (prisma: PrismaClient) =>
 
 export const deleteFn = (prisma: PrismaClient) =>
   sessions.map(async (data: Prisma.SessionCreateArgs['data']) => {
-    await prisma.session.delete({
-      where: { id: data.id },
+    await prisma.session.deleteMany({
+      where: { userId: data.userId },
     })
   })

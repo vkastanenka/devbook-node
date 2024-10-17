@@ -9,13 +9,13 @@ import { seedFn as userSeedFn, deleteFn as userDeleteFn } from './seeds/users'
 
 const deleteDatabase = async () => {
   try {
-    // Sessions
-    await Promise.all(sessionDeleteFn(prisma))
-    console.log('--- Deleted Sessions ---')
-    
     // Posts
     await Promise.all(postDeleteFn(prisma))
     console.log('--- Deleted Posts ---')
+
+    // Sessions
+    await Promise.all(sessionDeleteFn(prisma))
+    console.log('--- Deleted Sessions ---')
 
     // Users
     await Promise.all(userDeleteFn(prisma))
@@ -31,11 +31,7 @@ const seedDatabase = async () => {
     // Users
     const users = await Promise.all(userSeedFn(prisma))
     console.log('--- Seeded Users ---', users)
-
-    // Sessions
-    // const sessions = await Promise.all(sessionSeedFn(prisma))
-    // console.log('--- Seeded Sessions ---', sessions)
-
+    
     // Posts
     const posts = await Promise.all(postSeedFn(prisma))
     console.log('--- Seeded Posts ---', posts)

@@ -44,6 +44,20 @@ export const login = async (
       return
     }
 
+    const deletedSessions = await prisma.session.deleteMany({
+      where: {
+        userId: user.id,
+      },
+    })
+
+    if (!deletedSessions) {
+      res.status(400).json({
+        errors: { user: 'Unable to delete previous sessions' },
+      })
+
+      return
+    }
+
     const session = await prisma.session.create({
       data: {
         userId: user.id,
@@ -52,25 +66,16 @@ export const login = async (
       },
     })
 
-    const sessionData = await prisma.session.findUnique({
-      where: {
-        id: session.id,
-      },
-      select: {
-        id: true,
-      },
-    })
-
-    if (!sessionData) {
+    if (!session) {
       res.status(400).json({
-        errors: { user: 'Error creating user session' },
+        errors: { user: 'Unable to create session' },
       })
 
       return
     }
 
     const jwtSecret = new TextEncoder().encode(process.env.JWT_SECRET)
-    const jwt = await new SignJWT(sessionData)
+    const jwt = await new SignJWT({ id: session.id })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
       //   .setExpirationTime('10 sec from now')
@@ -114,14 +119,7 @@ export const getSessionById = async (
       return
     }
 
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET)
-    const jwt = await new SignJWT(session || {})
-      .setProtectedHeader({ alg: 'HS256' })
-      .setIssuedAt()
-      //   .setExpirationTime('10 sec from now')
-      .sign(secret)
-
-    res.status(200).json(jwt)
+    res.status(200).json(session)
   } catch (error) {
     console.log(error)
     res.status(400).json({
