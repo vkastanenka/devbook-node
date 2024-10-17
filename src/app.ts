@@ -8,7 +8,8 @@ import morgan from 'morgan'
 import rateLimit from 'express-rate-limit'
 
 // routes
-import userRouter from './routes/user-routes'
+import { authRouter } from './routes/auth-routes'
+import { userRouter } from './routes/user-routes'
 
 // Set up env variables
 dotenv.config()
@@ -50,6 +51,7 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }))
 app.use(compression())
 
 // Apply routes
-app.use("/api/v1/users", userRouter);
+app.use('/api/v1/auth', authRouter)
+app.use('/api/v1/users', userRouter)
 
 export default app

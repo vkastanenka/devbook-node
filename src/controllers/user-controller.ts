@@ -10,14 +10,18 @@ import { Request, Response, NextFunction } from 'express'
 // @route   GET api/v1/users/test
 // @desc    Tests users route
 // @access  Public
-const test = (req: Request, res: Response, next: NextFunction) => {
+export const test = (req: Request, res: Response, next: NextFunction) => {
   res.json({ message: 'Users route secured' })
 }
 
 // @route   GET api/v1/users/users/:id
 // @desc    Returns users matching id parameter
 // @access  Public
-const getUserById = async (req: Request, res: Response, next: NextFunction) => {
+export const getUserById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const user = await prisma.user.findUnique({
       where: {
@@ -42,13 +46,9 @@ const getUserById = async (req: Request, res: Response, next: NextFunction) => {
 
     res.status(200).json(user)
   } catch (error) {
+    console.log(error)
     res.status(400).json({
       errors: { user: 'Error fetching user' },
     })
-    console.log(error)
   }
 }
-
-const userController = { test, getUserById }
-
-export default userController

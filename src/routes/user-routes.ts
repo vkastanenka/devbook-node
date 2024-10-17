@@ -3,7 +3,7 @@ import express from 'express'
 const router = express.Router()
 
 // controllers
-import userController from '../controllers/user-controller'
+import { test, getUserById } from '../controllers/user-controller'
 
 /////////////////
 // Public Routes
@@ -11,11 +11,11 @@ import userController from '../controllers/user-controller'
 // @route   GET api/v1/users/test
 // @desc    Tests users route
 // @access  Public
-router.get('/test', userController.test)
+router.get('/test', test)
 
 // @route   GET api/v1/users/:id
 // @desc    Returns user matching id parameter
 // @access  Public
-router.get("/:id", userController.getUserById);
+router.get('/:id', getUserById)
 
-export default router
+export const userRouter = router
