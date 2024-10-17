@@ -94,6 +94,9 @@ import { Request, Response, NextFunction } from 'express'
 //   }
 // }
 
+// TODO: Add user object to req in middleware without typescript making a fuss
+// Hash password in prisma middleware: https://stackoverflow.com/questions/77435838/hash-password-in-prisma-orm
+
 /////////////////
 // Public Routes
 
