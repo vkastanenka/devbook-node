@@ -33,8 +33,8 @@ const seedDatabase = async () => {
     console.log('--- Seeded Users ---', users)
 
     // Sessions
-    const sessions = await Promise.all(sessionSeedFn(prisma))
-    console.log('--- Seeded Sessions ---', sessions)
+    // const sessions = await Promise.all(sessionSeedFn(prisma))
+    // console.log('--- Seeded Sessions ---', sessions)
 
     // Posts
     const posts = await Promise.all(postSeedFn(prisma))
