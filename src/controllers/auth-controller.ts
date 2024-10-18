@@ -100,6 +100,7 @@ const restrictTo = (roles: string[]) => {
 
 // TODO: Add error handling for prisma: https://stackoverflow.com/questions/75078929/how-to-handle-prisma-errors-and-send-a-valid-message-to-client
 // TODO: Handle checks and responses better
+// TODO: Scrub req bodies to remove fields
 
 /////////////////
 // Public Routes
