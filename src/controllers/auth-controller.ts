@@ -216,7 +216,7 @@ const login = catchAsync(
     const jwt = await new SignJWT({ id: session.id, expires: session.expires })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
-      .setExpirationTime('1 day')
+      .setExpirationTime('1d')
       .sign(jwtSecret)
 
     res.status(200).json(jwt)
