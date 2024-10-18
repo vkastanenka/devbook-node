@@ -18,7 +18,7 @@ router.get('/test', authController.test)
 // @access  Public
 router.post('/register', authController.register)
 
-// @route   GET api/v1/auth/login
+// @route   POST api/v1/auth/login
 // @desc    Login User / JWT Response
 // @access  Public
 router.post('/login', authController.login)

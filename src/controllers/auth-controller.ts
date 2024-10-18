@@ -1,5 +1,6 @@
 // utils
 import prisma from '../lib/db'
+import bcrypt from 'bcryptjs'
 import { SignJWT, jwtVerify } from 'jose'
 import { v4 as uuidv4 } from 'uuid'
 import { catchAsync } from '../lib/catchAsync'
@@ -8,7 +9,7 @@ import { catchAsync } from '../lib/catchAsync'
 import { Request, Response, NextFunction } from 'express'
 
 // validation
-import { registrationSchema } from '../lib/validation/auth'
+import { loginSchema, registrationSchema } from '../lib/validation/auth'
 
 //////////////
 // Middleware
@@ -115,6 +116,7 @@ const test = (req: Request, res: Response, next: NextFunction) => {
 // @access  Public
 const register = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    // Validate body
     const errors: { [key: string]: string | { message: string }[] } = {}
     registrationSchema.parse(req.body)
 
@@ -122,6 +124,7 @@ const register = catchAsync(
     const emailCheck = await prisma.user.findUnique({
       where: { email: req.body.email },
     })
+
     if (emailCheck) {
       errors.error = 'Invalid data'
       errors.details = [{ message: 'email: Email already taken.' }]
@@ -132,6 +135,7 @@ const register = catchAsync(
     const usernameCheck = await prisma.user.findUnique({
       where: { username: req.body.username },
     })
+
     if (usernameCheck) {
       errors.error = 'Invalid data'
       errors.details = [{ message: 'username: Username already taken.' }]
@@ -142,6 +146,7 @@ const register = catchAsync(
     const newUser = await prisma.user.create({
       data: req.body,
     })
+
     if (!newUser) {
       errors.error = 'Bad gateway'
       errors.details = [{ message: 'Error creating new user.' }]
@@ -153,60 +158,60 @@ const register = catchAsync(
   }
 )
 
-// @route   GET api/v1/auth/login
+// @route   POST api/v1/auth/login
 // @desc    Login User / JWT Response
 // @access  Public
-const login = async (req: Request, res: Response, next: NextFunction) => {
-  const { email, password } = req.body
+const login = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // Validate body
+    const errors: { [key: string]: string | { message: string }[] } = {}
+    loginSchema.parse(req.body)
 
-  try {
+    const { email, password } = req.body
+
+    // Find user
     const user = await prisma.user.findUnique({
       where: {
         email: email,
       },
       select: {
         id: true,
+        password: true,
       },
     })
 
-    if (!user) {
-      res
-        .status(400)
-        .json({ errors: { user: 'No session found with the provided email' } })
-
-      return
+    // Error if no user or passwords don't match
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      errors.error = 'Bad request'
+      errors.details = [{ message: 'Email and/or password are incorrect.' }]
+      return res.status(400).json(errors)
     }
 
-    const deletedSessions = await prisma.session.deleteMany({
+    // Delete previous sessions
+    await prisma.session.deleteMany({
       where: {
         userId: user.id,
       },
     })
 
-    if (!deletedSessions) {
-      res.status(400).json({
-        errors: { user: 'Unable to delete previous sessions' },
-      })
+    const sessionExpirationDate = new Date()
+    sessionExpirationDate.setDate(sessionExpirationDate.getDate() + 1)
 
-      return
-    }
-
+    // Create user session
     const session = await prisma.session.create({
       data: {
         userId: user.id,
-        sessionToken: uuidv4(), // TODO: Remove
-        expires: new Date().setDate(new Date().getDate() + 1).toString(),
+        expires: sessionExpirationDate,
       },
     })
 
     if (!session) {
-      res.status(400).json({
-        errors: { user: 'Unable to create session' },
-      })
-
-      return
+      errors.error = 'Bad gateway'
+      errors.details = [{ message: 'Error creating new user.' }]
+      return res.status(502).json(errors)
     }
 
+    // Encode session into jwt
     const jwtSecret = new TextEncoder().encode(process.env.JWT_SECRET)
     const jwt = await new SignJWT({ id: session.id, expires: session.expires })
       .setProtectedHeader({ alg: 'HS256' })
@@ -215,15 +220,8 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       .sign(jwtSecret)
 
     res.status(200).json(jwt)
-
-    return
-  } catch (error) {
-    console.log(error)
-    res.status(400).json({
-      errors: { user: 'Error fetching session' },
-    })
   }
-}
+)
 
 // @route   GET api/v1/auth/sessions/:id
 // @desc    Get user session

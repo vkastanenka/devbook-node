@@ -4,7 +4,6 @@ import { ExtendedPrismaClient } from '../../src/lib/db'
 const sessions: Prisma.SessionCreateArgs['data'][] = [
   {
     id: 'd35623ee-bef6-42b2-8776-2f99f8bb4782',
-    sessionToken: '8ac1ac77-7358-425e-be16-0bdde9f02e59',
     expires: new Date(),
     userId: 'f1bdf45e-1b1c-11ec-9621-0242ac130002',
   },
