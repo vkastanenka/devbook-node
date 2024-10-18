@@ -1,4 +1,5 @@
-import type { Prisma, PrismaClient } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
+import { ExtendedPrismaClient } from '../../src/lib/db'
 
 const posts: Prisma.PostCreateArgs['data'][] = [
   {
@@ -8,7 +9,7 @@ const posts: Prisma.PostCreateArgs['data'][] = [
   },
 ]
 
-export const seedFn = (prisma: PrismaClient) =>
+export const seedFn = (prisma: ExtendedPrismaClient) =>
   posts.map(async (data: Prisma.PostCreateArgs['data']) => {
     const record = await prisma.post.upsert({
       where: { id: data.id },
@@ -19,7 +20,7 @@ export const seedFn = (prisma: PrismaClient) =>
     return record
   })
 
-export const deleteFn = (prisma: PrismaClient) =>
+export const deleteFn = (prisma: ExtendedPrismaClient) =>
   posts.map(async (data: Prisma.PostCreateArgs['data']) => {
     await prisma.post.delete({
       where: { id: data.id },

@@ -2,33 +2,39 @@
 import bcrypt from 'bcryptjs'
 import { PrismaClient } from '@prisma/client'
 
-declare global {
-  // eslint-disable-next-line no-var
-  var prisma: PrismaClient | undefined
-}
-
-export const prisma =
-  global.prisma ||
-  new PrismaClient({
-    log:
-      process.env.NODE_ENV === 'development'
-        ? ['query', 'error', 'warn']
-        : ['error'],
+const prismaClientSingleton = () => {
+  return new PrismaClient().$extends({
+    query: {
+      user: {
+        async create({ model, operation, args, query }) {
+          args.data.password = await bcrypt.hash(
+            args.data.password as string,
+            12
+          )
+          return query(args)
+        },
+        async update({ model, operation, args, query }) {
+          if (args.data.password) {
+            args.data.password = await bcrypt.hash(
+              args.data.password as string,
+              12
+            )
+          }
+          return query(args)
+        },
+      },
+    },
   })
-
-// prisma.$extends({
-//   query: {
-//     user: {
-//       async create({ model, operation, args, query }) {
-//         args.data.password = await bcrypt.hash(args.data.password, 12)
-//         return query(args)
-//       },
-//     },
-//   },
-// })
-
-if (process.env.NODE_ENV !== 'production') {
-  global.prisma = prisma
 }
+
+export type ExtendedPrismaClient = ReturnType<typeof prismaClientSingleton>
+
+declare const globalThis: {
+  prismaGlobal: ReturnType<typeof prismaClientSingleton>
+} & typeof global
+
+const prisma = globalThis.prismaGlobal ?? prismaClientSingleton()
 
 export default prisma
+
+if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma

@@ -11,6 +11,9 @@ import rateLimit from 'express-rate-limit'
 import { authRouter } from './routes/auth-routes'
 import { userRouter } from './routes/user-routes'
 
+// types
+import './types/express'
+
 // Set up env variables
 dotenv.config()
 

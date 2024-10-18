@@ -80,22 +80,21 @@ import { Request, Response, NextFunction } from 'express'
 //   }
 // )
 
-// const restrictTo = (roles: string[]) => {
-//   return (req: Request, res: Response, next: NextFunction) => {
-//     const errors: { [key: string]: string } = {}
+const restrictTo = (roles: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const errors: { [key: string]: string } = {}
 
-//     // // If the user's role is not included in the argument, deny access
-//     // if (!roles.includes(req.user.role)) {
-//     //   errors.unauthorized = 'You do not have permission to perform this action.'
-//     //   return res.status(403).json(errors)
-//     // }
+    // If the user's role is not included in the argument, deny access
+    if (req.user && !roles.includes(req.user.role)) {
+      errors.unauthorized = 'You do not have permission to perform this action.'
+      return res.status(403).json(errors)
+    }
 
-//     next()
-//   }
-// }
+    next()
+  }
+}
 
 // TODO: Add user object to req in middleware without typescript making a fuss
-// Hash password in prisma middleware: https://stackoverflow.com/questions/77435838/hash-password-in-prisma-orm
 
 /////////////////
 // Public Routes
