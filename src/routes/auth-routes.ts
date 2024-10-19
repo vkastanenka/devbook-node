@@ -23,17 +23,17 @@ router.post('/register', authController.register)
 // @access  Public
 router.post('/login', authController.login)
 
-/////////////////
-// Private Routes
+///////////////////
+// Protected Routes
 
 // @route   GET api/v1/auth/sessions/:id
 // @desc    Returns session matching id parameter
 // @access  Public
-router.get('/sessions/:id', authController.getSessionById)
+router.get('/sessions/:id', authController.getSession)
 
 // @route   DELETE api/v1/auth/sessions/:id
 // @desc    Delete user session
 // @access  Private
-router.delete('/sessions/:id', authController.deleteSessionById)
+router.delete('/sessions/:id', authController.deleteSession)
 
 export const authRouter = router

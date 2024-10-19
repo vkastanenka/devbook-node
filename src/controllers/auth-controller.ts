@@ -1,15 +1,22 @@
+// controllers
+import { controllerFactory } from '../lib/controllerFactory'
+
 // utils
 import prisma from '../lib/db'
 import bcrypt from 'bcryptjs'
+import { createHash, randomBytes } from 'node:crypto'
 import { SignJWT, jwtVerify } from 'jose'
-import { v4 as uuidv4 } from 'uuid'
 import { catchAsync } from '../lib/catchAsync'
 
 // types
 import { Request, Response, NextFunction } from 'express'
 
 // validation
-import { loginSchema, registrationSchema } from '../lib/validation/auth'
+import {
+  loginSchema,
+  sendPasswordResetTokenSchema,
+  registrationSchema,
+} from '../lib/validation/auth'
 
 //////////////
 // Middleware
@@ -224,73 +231,88 @@ const login = catchAsync(
   }
 )
 
+// @route   POST api/v1/auth/send-password-reset-token
+// @desc    Send email with a password reset token
+// @access  Public
+const sendPasswordResetToken = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // Validate body
+    const errors: { [key: string]: string | { message: string }[] } = {}
+    sendPasswordResetTokenSchema.parse(req.body)
+
+    // Find user
+    const user = await prisma.user.findUnique({
+      where: {
+        email: req.body.email,
+      },
+    })
+
+    if (!user) {
+      errors.error = 'Not found'
+      errors.details = [{ message: 'User not found with that email.' }]
+      return res.status(404).json(errors)
+    }
+
+    // Create token and expiration
+    const token = randomBytes(32).toString('hex')
+    const tokenHashed = createHash('sha256').update(token).digest('hex')
+    const passwordResetTokenExpires = Date.now() + 10 * 60 * 1000 // 10 min
+
+    // Add information to user document
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        passwordResetToken: tokenHashed,
+        passwordResetTokenExpires,
+        ...req.body,
+      },
+    })
+
+    if (!updatedUser) {
+      errors.error = 'Bad gateway'
+      errors.details = [{ message: 'Error updating user with reset token.' }]
+      return res.status(502).json(errors)
+    }
+
+    try {
+      // Send an email with a link to a form to reset the user's password
+      // const resetURL = `http://localhost:3000/${resetToken}`
+      // await new Email(user, resetURL).sendPasswordReset()
+
+      // // Respond
+      // res.status(200).json({
+      //   success: 'Token sent to email!',
+      // })
+    } catch (err) {
+      // // In case of an error, reset the fields in the user document
+      // user.passwordResetToken = undefined
+      // user.passwordResetExpires = undefined
+      // await user.save({ validateBeforeSave: false })
+
+      // // Respond
+      // errors.server500 =
+      //   'There was a problem sending the email, please try again later.'
+      // res.status(500).json(errors)
+    }
+
+    res.status(200).json()
+  }
+)
+
+///////////////////
+// Protected Routes
+
 // @route   GET api/v1/auth/sessions/:id
 // @desc    Get user session
 // @access  Public
-const getSessionById = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const session = await prisma.session.findUnique({
-      where: {
-        id: req.params.id,
-      },
-      select: {
-        id: true,
-        userId: true,
-      },
-    })
-
-    if (!session) {
-      res
-        .status(400)
-        .json({ errors: { session: 'No session found with provided id' } })
-
-      return
-    }
-
-    res.status(200).json(session)
-  } catch (error) {
-    console.log(error)
-    res.status(400).json({
-      errors: { user: 'Error fetching session' },
-    })
-  }
-}
+const getSession = controllerFactory.readRecord(prisma.session)
 
 // @route   DELETE api/v1/auth/sessions/:id
 // @desc    Delete user session
 // @access  Private
-const deleteSessionById = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const session = await prisma.session.delete({
-      where: {
-        id: req.params.id,
-      },
-    })
-
-    if (!session) {
-      res
-        .status(400)
-        .json({ errors: { session: 'No session found with provided id' } })
-
-      return
-    }
-
-    res.status(200).json(session)
-  } catch (error) {
-    console.log(error)
-    res.status(400).json({
-      errors: { user: 'Error fetching session' },
-    })
-  }
-}
+const deleteSession = controllerFactory.deleteRecord(prisma.session)
 
 export const authController = {
   protect,
@@ -298,6 +320,6 @@ export const authController = {
   test,
   register,
   login,
-  getSessionById,
-  deleteSessionById,
+  getSession,
+  deleteSession,
 }

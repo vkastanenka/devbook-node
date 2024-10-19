@@ -20,6 +20,7 @@ const prismaClientSingleton = () => {
               12
             )
           }
+          args.data.updatedAt = new Date()
           return query(args)
         },
       },

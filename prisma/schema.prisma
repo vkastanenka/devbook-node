@@ -156,8 +156,8 @@ model PostLike {
 }
 
 model Session {
-  id           String   @id @default(uuid())
-  expires      DateTime
+  id      String   @id @default(uuid())
+  expires DateTime
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @map("user_id")
@@ -171,20 +171,24 @@ enum UserRole {
 }
 
 model User {
-  id       String  @id @default(uuid())
-  name     String
-  email    String  @unique
-  username String  @unique
-  password String
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  username      String    @unique
+  password      String
   emailVerified DateTime? @map("email_verified")
-  image    String?
-  headline String?
-  bio      String? @db.Text
+  image         String?
+  headline      String?
+  bio           String?   @db.Text
 
   // country   Country? @relation(fields: [countryId], references: [id], onUpdate: Cascade, onDelete: SetNull)
   // countryId String?  @map("country_id")
 
   role UserRole @default(USER)
+
+  passwordResetToken        String?   @map("password_reset_token")
+  passwordResetTokenExpires DateTime? @map("password_reset_token_expires")
+  passwordUpdatedAt         DateTime? @map("password_update_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")

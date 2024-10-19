@@ -1,11 +1,8 @@
+// controllers
+import { controllerFactory } from '../lib/controllerFactory'
+
 // utils
 import prisma from '../lib/db'
-import {
-  createRecord,
-  readRecord,
-  updateRecord,
-  deleteRecord,
-} from '../lib/controllerFactory'
 
 // types
 import { Request, Response, NextFunction } from 'express'
@@ -23,22 +20,22 @@ const test = (req: Request, res: Response, next: NextFunction) => {
 // @route   GET api/v1/users/:id
 // @desc    Gets user matching id
 // @access  Public
-const getUser = readRecord(prisma.user)
+const getUser = controllerFactory.readRecord(prisma.user)
 
 // @route   POST api/v1/users
 // @desc    Creates user
 // @access  Public
-const postUser = createRecord(prisma.user)
+const postUser = controllerFactory.createRecord(prisma.user)
 
 // @route   PATCH api/v1/users/:id
 // @desc    Updates user matching id
 // @access  Public
-const updateUser = updateRecord(prisma.user)
+const updateUser = controllerFactory.updateRecord(prisma.user)
 
 // @route   DELETE api/v1/users/:id
 // @desc    Deletes user matching id
 // @access  Public
-const deleteUser = deleteRecord(prisma.user)
+const deleteUser = controllerFactory.deleteRecord(prisma.user)
 
 export const userController = {
   test,

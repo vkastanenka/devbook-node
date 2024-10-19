@@ -2,7 +2,7 @@ import { catchAsync } from './catchAsync'
 
 const errors404 = { query: 'No record found with provided id' }
 
-export const createRecord = (Model: any) =>
+const createRecord = (Model: any) =>
   catchAsync(async (req, res, next) => {
     // 1. Create a new record
     const record = await Model.create({ data: req.body })
@@ -11,7 +11,7 @@ export const createRecord = (Model: any) =>
     res.status(201).json(record)
   })
 
-export const readRecord = (Model: any) =>
+const readRecord = (Model: any) =>
   catchAsync(async (req, res, next) => {
     // 1. Find the record by id
     const record = await Model.findUnique({
@@ -29,7 +29,7 @@ export const readRecord = (Model: any) =>
     res.status(200).json(record)
   })
 
-export const updateRecord = (Model: any) =>
+const updateRecord = (Model: any) =>
   catchAsync(async (req, res, next) => {
     // 1. Create a new record
     const record = await Model.update({
@@ -48,7 +48,7 @@ export const updateRecord = (Model: any) =>
     res.status(201).json(record)
   })
 
-export const deleteRecord = (Model: any) =>
+const deleteRecord = (Model: any) =>
   catchAsync(async (req, res, next) => {
     // 1. Find record by id
     const record = await Model.delete({
@@ -65,3 +65,10 @@ export const deleteRecord = (Model: any) =>
     // 3. Respond
     res.status(204).json({ status: 'success' })
   })
+
+export const controllerFactory = {
+  createRecord,
+  readRecord,
+  updateRecord,
+  deleteRecord,
+}
