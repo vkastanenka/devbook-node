@@ -7,6 +7,7 @@ import bcrypt from 'bcryptjs'
 import { createHash, randomBytes } from 'node:crypto'
 import { SignJWT, jwtVerify } from 'jose'
 import { catchAsync } from '../lib/catchAsync'
+import { addMinutes, addDays } from 'date-fns'
 
 // types
 import { Request, Response, NextFunction } from 'express'
@@ -202,8 +203,7 @@ const login = catchAsync(
       },
     })
 
-    const sessionExpirationDate = new Date()
-    sessionExpirationDate.setDate(sessionExpirationDate.getDate() + 1)
+    const sessionExpirationDate = addDays(new Date(), 1)
 
     // Create user session
     const session = await prisma.session.create({
@@ -256,7 +256,7 @@ const sendPasswordResetToken = catchAsync(
     // Create token and expiration
     const token = randomBytes(32).toString('hex')
     const tokenHashed = createHash('sha256').update(token).digest('hex')
-    const passwordResetTokenExpires = Date.now() + 10 * 60 * 1000 // 10 min
+    const passwordResetTokenExpires = addMinutes(new Date(), 10)
 
     // Add information to user document
     const updatedUser = await prisma.user.update({
@@ -266,7 +266,6 @@ const sendPasswordResetToken = catchAsync(
       data: {
         passwordResetToken: tokenHashed,
         passwordResetTokenExpires,
-        ...req.body,
       },
     })
 
@@ -276,26 +275,25 @@ const sendPasswordResetToken = catchAsync(
       return res.status(502).json(errors)
     }
 
-    try {
-      // Send an email with a link to a form to reset the user's password
-      // const resetURL = `http://localhost:3000/${resetToken}`
-      // await new Email(user, resetURL).sendPasswordReset()
-
-      // // Respond
-      // res.status(200).json({
-      //   success: 'Token sent to email!',
-      // })
-    } catch (err) {
-      // // In case of an error, reset the fields in the user document
-      // user.passwordResetToken = undefined
-      // user.passwordResetExpires = undefined
-      // await user.save({ validateBeforeSave: false })
-
-      // // Respond
-      // errors.server500 =
-      //   'There was a problem sending the email, please try again later.'
-      // res.status(500).json(errors)
-    }
+    // try {
+    //   // Send an email with a link to a form to reset the user's password
+    //   const resetURL = `http://localhost:3000/reset-password/${resetToken}`
+    //   // TODO: Create email
+    //   // await new Email(user, resetURL).sendPasswordReset()
+    //   // // Respond
+    //   // res.status(200).json({
+    //   //   success: 'Token sent to email!',
+    //   // })
+    // } catch (err) {
+    //   // // In case of an error, reset the fields in the user document
+    //   // user.passwordResetToken = undefined
+    //   // user.passwordResetExpires = undefined
+    //   // await user.save({ validateBeforeSave: false })
+    //   // // Respond
+    //   // errors.server500 =
+    //   //   'There was a problem sending the email, please try again later.'
+    //   // res.status(500).json(errors)
+    // }
 
     res.status(200).json()
   }
