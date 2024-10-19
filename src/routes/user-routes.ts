@@ -18,6 +18,11 @@ router.get('/test', userController.test)
 // @access  Public
 router.get('/:id', userController.getUser)
 
+// @route   GET api/v1/users
+// @desc    Get all users
+// @access  Public
+router.get('', userController.getAllUsers)
+
 // @route   POST api/v1/users
 // @desc    Creates user
 // @access  Public

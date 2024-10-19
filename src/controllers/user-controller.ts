@@ -22,6 +22,11 @@ const test = (req: Request, res: Response, next: NextFunction) => {
 // @access  Public
 const getUser = controllerFactory.readRecord(prisma.user)
 
+// @route   GET api/v1/users
+// @desc    Get all users
+// @access  Public
+const getAllUsers = controllerFactory.readAllRecords(prisma.user)
+
 // @route   POST api/v1/users
 // @desc    Creates user
 // @access  Public
@@ -40,6 +45,7 @@ const deleteUser = controllerFactory.deleteRecord(prisma.user)
 export const userController = {
   test,
   getUser,
+  getAllUsers,
   postUser,
   updateUser,
   deleteUser,

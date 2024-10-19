@@ -29,6 +29,20 @@ const readRecord = (Model: any) =>
     res.status(200).json(record)
   })
 
+const readAllRecords = (Model: any) =>
+  catchAsync(async (req, res, next) => {
+    // 1. Find the record by id
+    const record = await Model.findMany()
+
+    // 2. If no record, respond with an error
+    if (!record) {
+      return res.status(404).json(errors404)
+    }
+
+    // 3. Respond
+    res.status(200).json(record)
+  })
+
 const updateRecord = (Model: any) =>
   catchAsync(async (req, res, next) => {
     // 1. Create a new record
@@ -69,6 +83,7 @@ const deleteRecord = (Model: any) =>
 export const controllerFactory = {
   createRecord,
   readRecord,
+  readAllRecords,
   updateRecord,
   deleteRecord,
 }
