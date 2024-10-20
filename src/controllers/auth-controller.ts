@@ -309,6 +309,11 @@ const sendResetPasswordToken = catchAsync(
   }
 )
 
+// @route   PATCH api/v1/users/reset-password/:token
+// @desc    Resets user password with token
+// @access  Public
+const resetPassword = catchAsync(async (req, res, next) => {})
+
 ///////////////////
 // Protected Routes
 
@@ -329,6 +334,7 @@ export const authController = {
   register,
   login,
   sendResetPasswordToken,
+  resetPassword,
   getSession,
   deleteSession,
 }

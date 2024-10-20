@@ -28,6 +28,11 @@ router.post('/login', authController.login)
 // @access  Public
 router.post('/send-reset-password-token', authController.sendResetPasswordToken)
 
+// @route   PATCH api/v1/users/reset-password/:token
+// @desc    Resets user password with token
+// @access  Public
+router.patch('/reset-password/:token', authController.resetPassword)
+
 ///////////////////
 // Protected Routes
 
