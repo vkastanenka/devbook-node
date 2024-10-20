@@ -1,4 +1,4 @@
-import { catchAsync } from './catchAsync'
+import { catchAsync } from './catch-async'
 
 const errors404 = { query: 'No record found with provided id' }
 

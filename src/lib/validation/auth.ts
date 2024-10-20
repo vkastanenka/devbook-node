@@ -7,7 +7,7 @@ export const loginSchema = z.object({
     .min(8, { message: 'Password must be at least 8 characters.' }),
 })
 
-export const sendPasswordResetTokenSchema = z.object({
+export const sendResetPasswordTokenSchema = z.object({
   email: z.string().email(),
 })
 

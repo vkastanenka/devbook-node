@@ -1,5 +1,5 @@
 // controllers
-import { controllerFactory } from '../lib/controllerFactory'
+import { controllerFactory } from '../lib/controller-factory'
 
 // utils
 import prisma from '../lib/db'

@@ -23,6 +23,11 @@ router.post('/register', authController.register)
 // @access  Public
 router.post('/login', authController.login)
 
+// @route   POST api/v1/auth/send-reset-password-token
+// @desc    Send email with a password reset token
+// @access  Public
+router.post('/send-reset-password-token', authController.sendResetPasswordToken)
+
 ///////////////////
 // Protected Routes
 

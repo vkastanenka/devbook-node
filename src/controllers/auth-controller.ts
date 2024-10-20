@@ -1,13 +1,14 @@
 // controllers
-import { controllerFactory } from '../lib/controllerFactory'
+import { controllerFactory } from '../lib/controller-factory'
 
 // utils
 import prisma from '../lib/db'
 import bcrypt from 'bcryptjs'
 import { createHash, randomBytes } from 'node:crypto'
 import { SignJWT, jwtVerify } from 'jose'
-import { catchAsync } from '../lib/catchAsync'
+import { catchAsync } from '../lib/catch-async'
 import { addMinutes, addDays } from 'date-fns'
+import { sendResetPasswordTokenEmail } from '../lib/email'
 
 // types
 import { Request, Response, NextFunction } from 'express'
@@ -15,7 +16,7 @@ import { Request, Response, NextFunction } from 'express'
 // validation
 import {
   loginSchema,
-  sendPasswordResetTokenSchema,
+  sendResetPasswordTokenSchema,
   registrationSchema,
 } from '../lib/validation/auth'
 
@@ -227,18 +228,19 @@ const login = catchAsync(
       .setExpirationTime('1d')
       .sign(jwtSecret)
 
+    // Respond
     res.status(200).json(jwt)
   }
 )
 
-// @route   POST api/v1/auth/send-password-reset-token
+// @route   POST api/v1/auth/send-reset-password-token
 // @desc    Send email with a password reset token
 // @access  Public
-const sendPasswordResetToken = catchAsync(
+const sendResetPasswordToken = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // Validate body
     const errors: { [key: string]: string | { message: string }[] } = {}
-    sendPasswordResetTokenSchema.parse(req.body)
+    sendResetPasswordTokenSchema.parse(req.body)
 
     // Find user
     const user = await prisma.user.findUnique({
@@ -256,7 +258,7 @@ const sendPasswordResetToken = catchAsync(
     // Create token and expiration
     const token = randomBytes(32).toString('hex')
     const tokenHashed = createHash('sha256').update(token).digest('hex')
-    const passwordResetTokenExpires = addMinutes(new Date(), 10)
+    const resetPasswordTokenExpires = addMinutes(new Date(), 10)
 
     // Add information to user document
     const updatedUser = await prisma.user.update({
@@ -264,8 +266,8 @@ const sendPasswordResetToken = catchAsync(
         id: user.id,
       },
       data: {
-        passwordResetToken: tokenHashed,
-        passwordResetTokenExpires,
+        resetPasswordToken: tokenHashed,
+        resetPasswordTokenExpires,
       },
     })
 
@@ -275,27 +277,35 @@ const sendPasswordResetToken = catchAsync(
       return res.status(502).json(errors)
     }
 
-    // try {
-    //   // Send an email with a link to a form to reset the user's password
-    //   const resetURL = `http://localhost:3000/reset-password/${resetToken}`
-    //   // TODO: Create email
-    //   // await new Email(user, resetURL).sendPasswordReset()
-    //   // // Respond
-    //   // res.status(200).json({
-    //   //   success: 'Token sent to email!',
-    //   // })
-    // } catch (err) {
-    //   // // In case of an error, reset the fields in the user document
-    //   // user.passwordResetToken = undefined
-    //   // user.passwordResetExpires = undefined
-    //   // await user.save({ validateBeforeSave: false })
-    //   // // Respond
-    //   // errors.server500 =
-    //   //   'There was a problem sending the email, please try again later.'
-    //   // res.status(500).json(errors)
-    // }
+    try {
+      // Send an email with a link to a form to reset the user's password
+      const resetPasswordUrl = `http://localhost:3000/reset-password/${tokenHashed}`
+      await sendResetPasswordTokenEmail({
+        to: user.email,
+        url: resetPasswordUrl,
+      })
 
-    res.status(200).json()
+      // Respond
+      res.status(200).json()
+    } catch (err) {
+      // In case of an error, reset the fields in the user document
+      await prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          resetPasswordToken: null,
+          resetPasswordTokenExpires: null,
+        },
+      })
+
+      // Respond
+      res.status(500).json({
+        title: 'Server error',
+        description:
+          'There was a problem sending the email, please try again later.',
+      })
+    }
   }
 )
 
@@ -318,6 +328,7 @@ export const authController = {
   test,
   register,
   login,
+  sendResetPasswordToken,
   getSession,
   deleteSession,
 }
