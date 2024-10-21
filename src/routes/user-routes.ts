@@ -3,6 +3,7 @@ import express from 'express'
 const router = express.Router()
 
 // controllers
+import { authController } from '../controllers/auth-controller'
 import { userController } from '../controllers/user-controller'
 
 /////////////////
@@ -13,10 +14,10 @@ import { userController } from '../controllers/user-controller'
 // @access  Public
 router.get('/test', userController.test)
 
-// @route   GET api/v1/users/:id
+// @route   GET api/v1/users/user/:id
 // @desc    Returns user matching id parameter
 // @access  Public
-router.get('/:id', userController.getUser)
+router.get('/user/:id', userController.getUser)
 
 // @route   GET api/v1/users
 // @desc    Get all users
@@ -28,14 +29,24 @@ router.get('', userController.getAllUsers)
 // @access  Public
 router.post('', userController.postUser)
 
-// @route   PATCH api/v1/users/:id
+// @route   PATCH api/v1/users/user/:id
 // @desc    Updates user matching id
 // @access  Public
-router.patch('/:id', userController.updateUser)
+router.patch('/user/:id', userController.updateUser)
 
-// @route   DELETE api/v1/users/:id
+// @route   DELETE api/v1/users/user/:id
 // @desc    Deletes user matching id
 // @access  Public
-router.delete('/:id', userController.deleteUser)
+router.delete('/user/:id', userController.deleteUser)
+
+///////////////////
+// Protected Routes
+
+router.use(authController.protect)
+
+// @route   GET api/v1/users/current-user
+// @desc    Returns user associated with JWT
+// @access  Protected
+router.get("/current-user", userController.getCurrentUser);
 
 export const userRouter = router

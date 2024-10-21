@@ -3,47 +3,51 @@ import { controllerFactory } from '../lib/controller-factory'
 
 // utils
 import prisma from '../lib/db'
+import { responseService } from '../lib/response-service'
 
 // types
 import { Request, Response, NextFunction } from 'express'
 
-////////////////
-// Public Routes
-
-// @route   GET api/v1/users/test
-// @desc    Tests users route
-// @access  Public
+// Tests users route
 const test = (req: Request, res: Response, next: NextFunction) => {
   res.json({ message: 'Users route secured' })
 }
 
-// @route   GET api/v1/users/:id
-// @desc    Gets user matching id
-// @access  Public
+// Returns user associated with JWT
+const getCurrentUser = (req: Request, res: Response, next: NextFunction) => {
+  if (req.user) {
+    res
+      .status(responseService.statusCodes.ok)
+      .json(
+        responseService.success('Successfully obtained current user!', req.user)
+      )
+  } else {
+    res
+      .status(responseService.statusCodes.notFound)
+      .json(
+        responseService.success('Current user not found!', req.user)
+      )
+  }
+}
+
+// Gets user matching id
 const getUser = controllerFactory.readRecord(prisma.user)
 
-// @route   GET api/v1/users
-// @desc    Get all users
-// @access  Public
+// Get all users
 const getAllUsers = controllerFactory.readAllRecords(prisma.user)
 
-// @route   POST api/v1/users
-// @desc    Creates user
-// @access  Public
+// Creates user
 const postUser = controllerFactory.createRecord(prisma.user)
 
-// @route   PATCH api/v1/users/:id
-// @desc    Updates user matching id
-// @access  Public
+// Updates user matching id
 const updateUser = controllerFactory.updateRecord(prisma.user)
 
-// @route   DELETE api/v1/users/:id
-// @desc    Deletes user matching id
-// @access  Public
+// Deletes user matching id
 const deleteUser = controllerFactory.deleteRecord(prisma.user)
 
 export const userController = {
   test,
+  getCurrentUser,
   getUser,
   getAllUsers,
   postUser,

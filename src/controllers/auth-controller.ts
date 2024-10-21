@@ -10,6 +10,7 @@ import { catchAsync } from '../lib/catch-async'
 import { addMinutes, addDays } from 'date-fns'
 import { sendResetPasswordTokenEmail } from '../lib/email'
 import { responseService } from '../lib/response-service'
+import { promisify } from 'node:util'
 
 // types
 import { Request, Response, NextFunction } from 'express'
@@ -22,19 +23,137 @@ import {
   resetPasswordSchema,
 } from '../lib/validation/auth'
 
-/////////////////
-// Public Routes
+// Privatizes routes and makes accessible only to users with valid jwt session token
+const protect = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // Assigning token based on headers
+    let token
+    if (req.headers.authorization?.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1]
+    }
 
-// @route   GET api/v1/auth/test
-// @desc    Tests auth route
-// @access  Public
+    // Check if the token exists
+    if (!token) {
+      return res
+        .status(responseService.statusCodes.unauthorized)
+        .json(
+          responseService.unauthorizedError(
+            'You are not logged in! Please log in to gain access!'
+          )
+        )
+    }
+
+    // Decode jwt session token
+    const jwtSecret = new TextEncoder().encode(process.env.NEXT_JWT_SECRET)
+    const { payload } = await jwtVerify(token, jwtSecret, {
+      algorithms: ['HS256'],
+    })
+    // const decodedJwt = payload as { id: string; expires: string; iat: number }
+
+    return res.status(200).json({ hello: 'Victoria' })
+
+    // // Check if session is expired
+    // if (decodedJwt.expires < new Date().toString()) {
+    //   return res
+    //     .status(responseService.statusCodes.unauthorized)
+    //     .json(
+    //       responseService.unauthorizedError(
+    //         'Access token is expired. Please log in again!'
+    //       )
+    //     )
+    // }
+
+    // // Find session with user id
+    // const session = await prisma.session.findUnique({
+    //   where: {
+    //     id: decodedJwt.id,
+    //   },
+    // })
+
+    // // Check if the session exists
+    // if (!session) {
+    //   return res
+    //     .status(responseService.statusCodes.notFound)
+    //     .json(
+    //       responseService.notFoundError(
+    //         'Error locating session. Please log in again!'
+    //       )
+    //     )
+    // }
+
+    // // Check if the session is expired
+    // if (session.expires < new Date()) {
+    //   return res
+    //     .status(responseService.statusCodes.notFound)
+    //     .json(
+    //       responseService.notFoundError(
+    //         'Session has expired. Please log in again!'
+    //       )
+    //     )
+    // }
+
+    // // Find current user with session data
+    // const currentUser = await prisma.user.findUnique({
+    //   where: {
+    //     id: session.userId,
+    //   },
+    // })
+
+    // // Check if current user still exists
+    // if (!currentUser) {
+    //   return res
+    //     .status(responseService.statusCodes.notFound)
+    //     .json(
+    //       responseService.notFoundError(
+    //         'The user related to this token no longer exists!'
+    //       )
+    //     )
+    // }
+
+    // // Check if user changed password after the token was issued TODO
+    // if (
+    //   currentUser.passwordUpdatedAt &&
+    //   currentUser.passwordUpdatedAt < new Date()
+    // ) {
+    //   return res
+    //     .status(responseService.statusCodes.unauthorized)
+    //     .json(
+    //       responseService.unauthorizedError(
+    //         'User has recently changed their password! Please log in again!'
+    //       )
+    //     )
+    // }
+
+    // // Assign currentUser to req.user to be used in protected route functions
+    // req.user = currentUser
+
+    next()
+  }
+)
+
+const restrictTo = (roles: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    // If the user's role is not included in the argument, deny access
+    if (req.user && !roles.includes(req.user.role)) {
+      return res
+        .status(responseService.statusCodes.forbidden)
+        .json(
+          responseService.forbiddenError(
+            'You do not have permission to perform this action!'
+          )
+        )
+    }
+
+    next()
+  }
+}
+
+// Tests auth route
 const test = (req: Request, res: Response, next: NextFunction) => {
   res.json({ message: 'Auth route secured' })
 }
 
-// @route   POST api/v1/auth/register
-// @desc    Register user
-// @access  Public
+// Register user
 const register = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // Validate body
@@ -74,9 +193,7 @@ const register = catchAsync(
   }
 )
 
-// @route   POST api/v1/auth/login
-// @desc    Login User / JWT Response
-// @access  Public
+// Login User / JWT Response
 const login = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // Validate body
@@ -134,9 +251,7 @@ const login = catchAsync(
   }
 )
 
-// @route   POST api/v1/auth/send-reset-password-token
-// @desc    Send email with a reset password token
-// @access  Public
+// Send email with a reset password token
 const sendResetPasswordToken = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // Validate body
@@ -211,9 +326,7 @@ const sendResetPasswordToken = catchAsync(
   }
 )
 
-// @route   PATCH api/v1/users/reset-password/:token
-// @desc    Resets user password with token
-// @access  Public
+// Resets user password with token
 const resetPassword = catchAsync(async (req, res, next) => {
   // Validate body
   resetPasswordSchema.parse(req.body)
@@ -260,109 +373,15 @@ const resetPassword = catchAsync(async (req, res, next) => {
     .json(responseService.success('Password successfully reset!', {}))
 })
 
-///////////////////
-// Protected Routes
-
-// @route   GET api/v1/auth/sessions/:id
-// @desc    Get user session
-// @access  Public
+// Get user session
 const getSession = controllerFactory.readRecord(prisma.session)
 
-// @route   DELETE api/v1/auth/sessions/:id
-// @desc    Delete user session
-// @access  Private
+// Delete user session
 const deleteSession = controllerFactory.deleteRecord(prisma.session)
 
-// //////////////
-// // Middleware
-
-// // Privatizes routes and makes accessible only to users with valid jwt session token
-// const protect = catchAsync(
-//   async (req: Request, res: Response, next: NextFunction) => {
-//     const errors: { [key: string]: string } = {}
-
-//     // Assigning token based on headers
-//     let token
-//     if (req.headers.authorization?.startsWith('Bearer')) {
-//       token = req.headers.authorization.split(' ')[1]
-//     }
-
-//     // Check if the token exists
-//     if (!token) {
-//       errors.authentication =
-//         'You are not logged in! Please log in to gain access.'
-//       return res.status(401).json(errors)
-//     }
-
-//     // Decode jwt session token
-//     const jwtSecret = new TextEncoder().encode(process.env.NEXT_JWT_SECRET)
-//     const { payload } = await jwtVerify(token, jwtSecret, {
-//       algorithms: ['HS256'],
-//     })
-//     const decodedJwt = payload as { id: string; expires: string; iat: number }
-
-//     // Check if session is expired
-//     if (decodedJwt.expires < new Date().toString()) {
-//       errors.authentication = 'Access token is expired. Please log in again.'
-//       return res.status(401).json(errors)
-//     }
-
-//     // Find session with user id
-//     const session = await prisma.session.findUnique({
-//       where: {
-//         id: decodedJwt.id,
-//       },
-//     })
-
-//     // Check if the session exists
-//     if (!session) {
-//       errors.query = 'Error locating session. Please log in again.'
-//       return res.status(400).json(errors)
-//     }
-
-//     // Find current user with session data
-//     const currentUser = await prisma.user.findUnique({
-//       where: {
-//         id: session.userId,
-//       },
-//     })
-
-//     // Check if current user still exists
-//     if (!currentUser) {
-//       errors.query = 'The user related to this token no longer exists.'
-//       return res.status(401).json(errors)
-//     }
-
-//     // Check if user changed password after the token was issued TODO
-//     // if (await currentUser.changedPasswordAfter(decoded.iat)) {
-//     //   errors.changedPassword =
-//     //     'User has recently changed their password! Please log in again!'
-//     //   return res.status(401).json(errors)
-//     // }
-
-//     // Assign currentUser to req.user to be used in protected route functions
-//     // req.user = currentUser
-//     next()
-//   }
-// )
-
-// const restrictTo = (roles: string[]) => {
-//   return (req: Request, res: Response, next: NextFunction) => {
-//     const errors: { [key: string]: string } = {}
-
-//     // If the user's role is not included in the argument, deny access
-//     if (req.user && !roles.includes(req.user.role)) {
-//       errors.unauthorized = 'You do not have permission to perform this action.'
-//       return res.status(403).json(errors)
-//     }
-
-//     next()
-//   }
-// }
-
 export const authController = {
-  // protect,
-  // restrictTo,
+  protect,
+  restrictTo,
   test,
   register,
   login,
