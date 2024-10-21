@@ -1,83 +1,86 @@
+// utils
 import { catchAsync } from './catch-async'
-
-const errors404 = { query: 'No record found with provided id' }
+import { responseService } from './response-service'
 
 const createRecord = (Model: any) =>
   catchAsync(async (req, res, next) => {
-    // 1. Create a new record
+    // Create a new record
     const record = await Model.create({ data: req.body })
 
-    // 2. Respond
-    res.status(201).json(record)
+    // Respond
+    res
+      .status(responseService.statusCodes.created)
+      .json(
+        responseService.createdSuccess('Successfully created record!', record)
+      )
   })
 
 const readRecord = (Model: any) =>
   catchAsync(async (req, res, next) => {
-    // 1. Find the record by id
+    // Find the record by id
     const record = await Model.findUnique({
       where: {
         id: req.params.id,
       },
     })
 
-    // 2. If no record, respond with an error
+    // If no record, respond with an error
     if (!record) {
-      return res.status(404).json(errors404)
+      return res
+        .status(responseService.statusCodes.notFound)
+        .json(
+          responseService.notFoundError('No record found with provided id!')
+        )
     }
 
-    // 3. Respond
-    res.status(200).json(record)
+    // Respond
+    res
+      .status(responseService.statusCodes.ok)
+      .json(responseService.success('Successfully found record!', record))
   })
 
 const readAllRecords = (Model: any) =>
   catchAsync(async (req, res, next) => {
-    // 1. Find the record by id
-    const record = await Model.findMany()
+    // Find all records
+    const records = await Model.findMany()
 
-    // 2. If no record, respond with an error
-    if (!record) {
-      return res.status(404).json(errors404)
-    }
-
-    // 3. Respond
-    res.status(200).json(record)
+    // Respond
+    res
+      .status(responseService.statusCodes.ok)
+      .json(responseService.success('Successfully found all records!', records))
   })
 
 const updateRecord = (Model: any) =>
   catchAsync(async (req, res, next) => {
-    // 1. Create a new record
-    const record = await Model.update({
+    // Update record
+    const updatedRecord = await Model.update({
       where: {
         id: req.params.id,
       },
       data: { ...req.body, updatedAt: new Date() },
     })
 
-    // 2. If no record, respond with an error
-    if (!record) {
-      return res.status(404).json(errors404)
-    }
-
-    // 3. Respond
-    res.status(201).json(record)
+    // Respond
+    res
+      .status(responseService.statusCodes.ok)
+      .json(
+        responseService.success('Successfully updated record!', updatedRecord)
+      )
   })
 
 const deleteRecord = (Model: any) =>
   catchAsync(async (req, res, next) => {
-    // 1. Find record by id
-    const record = await Model.delete({
+    // Delete record
+    await Model.delete({
       where: {
         id: req.params.id,
       },
     })
 
-    // 2. If no record, respond with an error
-    if (!record) {
-      return res.status(404).json(errors404)
-    }
-
-    // 3. Respond
-    res.status(204).json({ status: 'success' })
+    // Respond
+    res
+      .status(responseService.statusCodes.noContent)
+      .json(responseService.noContentSuccess('Successfully deleted record!'))
   })
 
 export const controllerFactory = {

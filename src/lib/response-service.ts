@@ -30,6 +30,14 @@ export const responseService = {
     }
   },
 
+  noContentSuccess(message: string) {
+    return {
+      success: true,
+      message,
+      status: this.statusCodes.created,
+    }
+  },
+
   error(message: string, error: string) {
     return {
       success: false,
