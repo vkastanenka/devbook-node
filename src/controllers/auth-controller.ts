@@ -1,16 +1,12 @@
-// controllers
-import { controllerFactory } from '../lib/controller-factory'
-
 // utils
 import prisma from '../lib/db'
 import bcrypt from 'bcryptjs'
 import { createHash, randomBytes } from 'node:crypto'
-import { SignJWT, jwtVerify } from 'jose'
 import { catchAsync } from '../lib/catch-async'
 import { addMinutes, addDays } from 'date-fns'
 import { sendResetPasswordTokenEmail } from '../lib/email'
 import { responseService } from '../lib/response-service'
-import { promisify } from 'node:util'
+import jsonwebtoken from 'jsonwebtoken'
 
 // types
 import { Request, Response, NextFunction } from 'express'
@@ -34,98 +30,101 @@ const protect = catchAsync(
 
     // Check if the token exists
     if (!token) {
-      return res
+      res
         .status(responseService.statusCodes.unauthorized)
         .json(
           responseService.unauthorizedError(
             'You are not logged in! Please log in to gain access!'
           )
         )
+      return
     }
 
     // Decode jwt session token
-    const jwtSecret = new TextEncoder().encode(process.env.NEXT_JWT_SECRET)
-    const { payload } = await jwtVerify(token, jwtSecret, {
-      algorithms: ['HS256'],
+    const decodedJwt = (await jsonwebtoken.verify(
+      token,
+      process.env.JWT_SECRET || ''
+    )) as jsonwebtoken.JwtPayload
+
+    // Check if session is expired
+    if (decodedJwt.expires < new Date()) {
+      res
+        .status(responseService.statusCodes.unauthorized)
+        .json(
+          responseService.unauthorizedError(
+            'Access token is expired. Please log in again!'
+          )
+        )
+      return
+    }
+
+    // Find session that has user id
+    const session = await prisma.session.findUnique({
+      where: {
+        id: decodedJwt.id,
+      },
     })
-    // const decodedJwt = payload as { id: string; expires: string; iat: number }
 
-    return res.status(200).json({ hello: 'Victoria' })
+    // Check if the session exists
+    if (!session) {
+      res
+        .status(responseService.statusCodes.notFound)
+        .json(
+          responseService.notFoundError(
+            'Error locating session. Please log in again!'
+          )
+        )
+      return
+    }
 
-    // // Check if session is expired
-    // if (decodedJwt.expires < new Date().toString()) {
-    //   return res
-    //     .status(responseService.statusCodes.unauthorized)
-    //     .json(
-    //       responseService.unauthorizedError(
-    //         'Access token is expired. Please log in again!'
-    //       )
-    //     )
-    // }
+    // Check if the session is expired
+    if (session.expires < new Date()) {
+      res
+        .status(responseService.statusCodes.notFound)
+        .json(
+          responseService.notFoundError(
+            'Session has expired. Please log in again!'
+          )
+        )
+      return
+    }
 
-    // // Find session with user id
-    // const session = await prisma.session.findUnique({
-    //   where: {
-    //     id: decodedJwt.id,
-    //   },
-    // })
+    // Find current user with session data
+    const currentUser = await prisma.user.findUnique({
+      where: {
+        id: session.userId,
+      },
+    })
 
-    // // Check if the session exists
-    // if (!session) {
-    //   return res
-    //     .status(responseService.statusCodes.notFound)
-    //     .json(
-    //       responseService.notFoundError(
-    //         'Error locating session. Please log in again!'
-    //       )
-    //     )
-    // }
+    // Check if current user still exists
+    if (!currentUser) {
+      res
+        .status(responseService.statusCodes.notFound)
+        .json(
+          responseService.notFoundError(
+            'The user related to this token no longer exists!'
+          )
+        )
+      return
+    }
 
-    // // Check if the session is expired
-    // if (session.expires < new Date()) {
-    //   return res
-    //     .status(responseService.statusCodes.notFound)
-    //     .json(
-    //       responseService.notFoundError(
-    //         'Session has expired. Please log in again!'
-    //       )
-    //     )
-    // }
+    // Check if user changed password after the token was issued TODO
+    if (
+      currentUser.passwordUpdatedAt &&
+      currentUser.passwordUpdatedAt < new Date()
+    ) {
+      res
+        .status(responseService.statusCodes.unauthorized)
+        .json(
+          responseService.unauthorizedError(
+            'User has recently changed their password! Please log in again!'
+          )
+        )
+      return
+    }
 
-    // // Find current user with session data
-    // const currentUser = await prisma.user.findUnique({
-    //   where: {
-    //     id: session.userId,
-    //   },
-    // })
-
-    // // Check if current user still exists
-    // if (!currentUser) {
-    //   return res
-    //     .status(responseService.statusCodes.notFound)
-    //     .json(
-    //       responseService.notFoundError(
-    //         'The user related to this token no longer exists!'
-    //       )
-    //     )
-    // }
-
-    // // Check if user changed password after the token was issued TODO
-    // if (
-    //   currentUser.passwordUpdatedAt &&
-    //   currentUser.passwordUpdatedAt < new Date()
-    // ) {
-    //   return res
-    //     .status(responseService.statusCodes.unauthorized)
-    //     .json(
-    //       responseService.unauthorizedError(
-    //         'User has recently changed their password! Please log in again!'
-    //       )
-    //     )
-    // }
-
-    // // Assign currentUser to req.user to be used in protected route functions
-    // req.user = currentUser
+    // Assign currentUser to req.user to be used in protected route functions
+    req.user = currentUser
 
     next()
   }
@@ -135,13 +134,14 @@ const restrictTo = (roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     // If the user's role is not included in the argument, deny access
     if (req.user && !roles.includes(req.user.role)) {
-      return res
+      res
         .status(responseService.statusCodes.forbidden)
         .json(
           responseService.forbiddenError(
             'You do not have permission to perform this action!'
           )
         )
+      return
     }
 
     next()
@@ -151,6 +151,7 @@ const restrictTo = (roles: string[]) => {
 // Tests auth route
 const test = (req: Request, res: Response, next: NextFunction) => {
   res.json({ message: 'Auth route secured' })
+  return
 }
 
 // Register user
@@ -165,9 +166,10 @@ const register = catchAsync(
     })
 
     if (emailCheck) {
-      return res
+      res
         .status(responseService.statusCodes.badRequest)
         .json(responseService.badRequestError('Email taken!'))
+      return
     }
 
     // Check if username is taken
@@ -176,9 +178,10 @@ const register = catchAsync(
     })
 
     if (usernameCheck) {
-      return res
+      res
         .status(responseService.statusCodes.badRequest)
         .json(responseService.badRequestError('Username taken!'))
+      return
     }
 
     // Create new user
@@ -190,6 +193,7 @@ const register = catchAsync(
     res
       .status(responseService.statusCodes.created)
       .json(responseService.createdSuccess('Registration successful!', newUser))
+    return
   }
 )
 
@@ -212,13 +216,14 @@ const login = catchAsync(
 
     // Res with error if no user or passwords don't match
     if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
-      return res
+      res
         .status(responseService.statusCodes.badRequest)
         .json(
           responseService.badRequestError(
             'Email and/or password are incorrect.'
           )
         )
+      return
     }
 
     // Delete previous sessions
@@ -237,17 +242,17 @@ const login = catchAsync(
     })
 
     // Encode session into jwt
-    const jwtSecret = new TextEncoder().encode(process.env.JWT_SECRET)
-    const jwt = await new SignJWT({ id: session.id, expires: session.expires })
-      .setProtectedHeader({ alg: 'HS256' })
-      .setIssuedAt()
-      .setExpirationTime('1d')
-      .sign(jwtSecret)
+    const jwt = await jsonwebtoken.sign(
+      { id: session.id, expires: session.expires },
+      process.env.JWT_SECRET || '',
+      { expiresIn: '1d' }
+    )
 
     // Respond
     res
       .status(responseService.statusCodes.ok)
       .json(responseService.success('Login successful!', jwt))
+    return
   }
 )
 
@@ -265,11 +270,12 @@ const sendResetPasswordToken = catchAsync(
     })
 
     if (!user) {
-      return res
+      res
         .status(responseService.statusCodes.notFound)
         .json(
           responseService.notFoundError('No user found with provided email!')
         )
+      return
     }
 
     // Create reset password token and expiration
@@ -302,6 +308,7 @@ const sendResetPasswordToken = catchAsync(
         .json(
           responseService.success('Reset password token send to email!', {})
         )
+      return
     } catch (err) {
       // In case of an error, reset the fields in the user document
       await prisma.user.update({
@@ -322,6 +329,7 @@ const sendResetPasswordToken = catchAsync(
             'There was a problem sending the email, please try again later!'
           )
         )
+      return
     }
   }
 )
@@ -349,9 +357,10 @@ const resetPassword = catchAsync(async (req, res, next) => {
     (user?.resetPasswordTokenExpires &&
       new Date() > user?.resetPasswordTokenExpires)
   ) {
-    return res
+    res
       .status(responseService.statusCodes.badRequest)
       .json(responseService.badRequestError('Token is invalid or expired.'))
+    return
   }
 
   // If token is valid and not expired, set the new password
@@ -371,13 +380,8 @@ const resetPassword = catchAsync(async (req, res, next) => {
   res
     .status(responseService.statusCodes.ok)
     .json(responseService.success('Password successfully reset!', {}))
+  return
 })
-
-// Get user session
-const getSession = controllerFactory.readRecord(prisma.session)
-
-// Delete user session
-const deleteSession = controllerFactory.deleteRecord(prisma.session)
 
 export const authController = {
   protect,
@@ -387,6 +391,4 @@ export const authController = {
   login,
   sendResetPasswordToken,
   resetPassword,
-  getSession,
-  deleteSession,
 }

@@ -1,9 +1,11 @@
 // express
 import express from 'express'
-const router = express.Router()
 
 // controllers
 import { authController } from '../controllers/auth-controller'
+
+// Set up router
+const router = express.Router()
 
 /////////////////
 // Public Routes
@@ -32,18 +34,5 @@ router.post('/send-reset-password-token', authController.sendResetPasswordToken)
 // @desc    Resets user password with token
 // @access  Public
 router.patch('/reset-password/:token', authController.resetPassword)
-
-///////////////////
-// Protected Routes
-
-// @route   GET api/v1/auth/sessions/:id
-// @desc    Returns session matching id parameter
-// @access  Public
-router.get('/sessions/:id', authController.getSession)
-
-// @route   DELETE api/v1/auth/sessions/:id
-// @desc    Delete user session
-// @access  Private
-router.delete('/sessions/:id', authController.deleteSession)
 
 export const authRouter = router

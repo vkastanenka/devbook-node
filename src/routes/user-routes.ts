@@ -1,10 +1,15 @@
 // express
 import express from 'express'
-const router = express.Router()
 
 // controllers
 import { authController } from '../controllers/auth-controller'
 import { userController } from '../controllers/user-controller'
+
+// types
+import { UserRole } from '@prisma/client'
+
+// Set up router
+const router = express.Router()
 
 /////////////////
 // Public Routes
@@ -13,6 +18,21 @@ import { userController } from '../controllers/user-controller'
 // @desc    Tests users route
 // @access  Public
 router.get('/test', userController.test)
+
+///////////////////
+// Protected Routes
+
+router.use(authController.protect)
+
+// @route   GET api/v1/users/current-user
+// @desc    Returns user associated with JWT
+// @access  Protected
+router.get('/current-user', userController.getCurrentUser)
+
+////////////////////
+// Restricted Routes
+
+router.use(authController.restrictTo([UserRole.ADMIN]))
 
 // @route   GET api/v1/users/user/:id
 // @desc    Returns user matching id parameter
@@ -38,15 +58,5 @@ router.patch('/user/:id', userController.updateUser)
 // @desc    Deletes user matching id
 // @access  Public
 router.delete('/user/:id', userController.deleteUser)
-
-///////////////////
-// Protected Routes
-
-router.use(authController.protect)
-
-// @route   GET api/v1/users/current-user
-// @desc    Returns user associated with JWT
-// @access  Protected
-router.get("/current-user", userController.getCurrentUser);
 
 export const userRouter = router

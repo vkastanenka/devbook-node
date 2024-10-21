@@ -11,6 +11,7 @@ import { Request, Response, NextFunction } from 'express'
 // Tests users route
 const test = (req: Request, res: Response, next: NextFunction) => {
   res.json({ message: 'Users route secured' })
+  return
 }
 
 // Returns user associated with JWT
@@ -18,15 +19,13 @@ const getCurrentUser = (req: Request, res: Response, next: NextFunction) => {
   if (req.user) {
     res
       .status(responseService.statusCodes.ok)
-      .json(
-        responseService.success('Successfully obtained current user!', req.user)
-      )
+      .json(responseService.success('Found current user!', req.user))
+    return
   } else {
     res
       .status(responseService.statusCodes.notFound)
-      .json(
-        responseService.success('Current user not found!', req.user)
-      )
+      .json(responseService.success('Current user not found!', req.user))
+    return
   }
 }
 
