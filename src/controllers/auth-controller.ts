@@ -9,6 +9,7 @@ import { SignJWT, jwtVerify } from 'jose'
 import { catchAsync } from '../lib/catch-async'
 import { addMinutes, addDays } from 'date-fns'
 import { sendResetPasswordTokenEmail } from '../lib/email'
+import { responseService } from '../lib/response-service'
 
 // types
 import { Request, Response, NextFunction } from 'express'
@@ -16,8 +17,9 @@ import { Request, Response, NextFunction } from 'express'
 // validation
 import {
   loginSchema,
-  sendResetPasswordTokenSchema,
   registrationSchema,
+  sendResetPasswordTokenSchema,
+  resetPasswordSchema,
 } from '../lib/validation/auth'
 
 //////////////
@@ -109,7 +111,6 @@ const restrictTo = (roles: string[]) => {
 
 // TODO: Add error handling for prisma: https://stackoverflow.com/questions/75078929/how-to-handle-prisma-errors-and-send-a-valid-message-to-client
 // TODO: Handle checks and responses better
-// TODO: Scrub req bodies to remove fields
 
 /////////////////
 // Public Routes
@@ -127,7 +128,6 @@ const test = (req: Request, res: Response, next: NextFunction) => {
 const register = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // Validate body
-    const errors: { [key: string]: string | { message: string }[] } = {}
     registrationSchema.parse(req.body)
 
     // Check if email is taken
@@ -136,9 +136,9 @@ const register = catchAsync(
     })
 
     if (emailCheck) {
-      errors.error = 'Invalid data'
-      errors.details = [{ message: 'email: Email already taken.' }]
-      return res.status(400).json(errors)
+      return res
+        .status(responseService.statusCodes.badRequest)
+        .json(responseService.badRequestError('Email taken!'))
     }
 
     // Check if username is taken
@@ -147,9 +147,9 @@ const register = catchAsync(
     })
 
     if (usernameCheck) {
-      errors.error = 'Invalid data'
-      errors.details = [{ message: 'username: Username already taken.' }]
-      return res.status(400).json(errors)
+      return res
+        .status(responseService.statusCodes.badRequest)
+        .json(responseService.badRequestError('Username taken!'))
     }
 
     // Create new user
@@ -157,14 +157,10 @@ const register = catchAsync(
       data: req.body,
     })
 
-    if (!newUser) {
-      errors.error = 'Bad gateway'
-      errors.details = [{ message: 'Error creating new user.' }]
-      return res.status(502).json(errors)
-    }
-
     // Respond
-    res.status(201).json(newUser)
+    res
+      .status(responseService.statusCodes.created)
+      .json(responseService.createdSuccess('Registration successful!', newUser))
   }
 )
 
@@ -174,15 +170,12 @@ const register = catchAsync(
 const login = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // Validate body
-    const errors: { [key: string]: string | { message: string }[] } = {}
     loginSchema.parse(req.body)
-
-    const { email, password } = req.body
 
     // Find user
     const user = await prisma.user.findUnique({
       where: {
-        email: email,
+        email: req.body.email,
       },
       select: {
         id: true,
@@ -190,11 +183,15 @@ const login = catchAsync(
       },
     })
 
-    // Error if no user or passwords don't match
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      errors.error = 'Bad request'
-      errors.details = [{ message: 'Email and/or password are incorrect.' }]
-      return res.status(400).json(errors)
+    // Res with error if no user or passwords don't match
+    if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
+      return res
+        .status(responseService.statusCodes.badRequest)
+        .json(
+          responseService.badRequestError(
+            'Email and/or password are incorrect.'
+          )
+        )
     }
 
     // Delete previous sessions
@@ -204,21 +201,13 @@ const login = catchAsync(
       },
     })
 
-    const sessionExpirationDate = addDays(new Date(), 1)
-
     // Create user session
     const session = await prisma.session.create({
       data: {
         userId: user.id,
-        expires: sessionExpirationDate,
+        expires: addDays(new Date(), 1),
       },
     })
-
-    if (!session) {
-      errors.error = 'Bad gateway'
-      errors.details = [{ message: 'Error creating new user.' }]
-      return res.status(502).json(errors)
-    }
 
     // Encode session into jwt
     const jwtSecret = new TextEncoder().encode(process.env.JWT_SECRET)
@@ -229,7 +218,9 @@ const login = catchAsync(
       .sign(jwtSecret)
 
     // Respond
-    res.status(200).json(jwt)
+    res
+      .status(responseService.statusCodes.ok)
+      .json(responseService.success('Login successful!', jwt))
   }
 )
 
@@ -239,7 +230,6 @@ const login = catchAsync(
 const sendResetPasswordToken = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // Validate body
-    const errors: { [key: string]: string | { message: string }[] } = {}
     sendResetPasswordTokenSchema.parse(req.body)
 
     // Find user
@@ -250,18 +240,20 @@ const sendResetPasswordToken = catchAsync(
     })
 
     if (!user) {
-      errors.error = 'Not found'
-      errors.details = [{ message: 'User not found with that email.' }]
-      return res.status(404).json(errors)
+      return res
+        .status(responseService.statusCodes.notFound)
+        .json(
+          responseService.notFoundError('No user found with provided email!')
+        )
     }
 
-    // Create token and expiration
+    // Create reset password token and expiration
     const token = randomBytes(32).toString('hex')
     const tokenHashed = createHash('sha256').update(token).digest('hex')
     const resetPasswordTokenExpires = addMinutes(new Date(), 10)
 
     // Add information to user document
-    const updatedUser = await prisma.user.update({
+    await prisma.user.update({
       where: {
         id: user.id,
       },
@@ -270,12 +262,6 @@ const sendResetPasswordToken = catchAsync(
         resetPasswordTokenExpires,
       },
     })
-
-    if (!updatedUser) {
-      errors.error = 'Bad gateway'
-      errors.details = [{ message: 'Error updating user with reset token.' }]
-      return res.status(502).json(errors)
-    }
 
     try {
       // Send an email with a link to a form to reset the user's password
@@ -286,7 +272,11 @@ const sendResetPasswordToken = catchAsync(
       })
 
       // Respond
-      res.status(200).json()
+      res
+        .status(responseService.statusCodes.ok)
+        .json(
+          responseService.success('Reset password token send to email!', {})
+        )
     } catch (err) {
       // In case of an error, reset the fields in the user document
       await prisma.user.update({
@@ -300,11 +290,13 @@ const sendResetPasswordToken = catchAsync(
       })
 
       // Respond
-      res.status(500).json({
-        title: 'Server error',
-        description:
-          'There was a problem sending the email, please try again later.',
-      })
+      res
+        .status(responseService.statusCodes.internalServerError)
+        .json(
+          responseService.internalServerError(
+            'There was a problem sending the email, please try again later!'
+          )
+        )
     }
   }
 )
@@ -312,7 +304,50 @@ const sendResetPasswordToken = catchAsync(
 // @route   PATCH api/v1/users/reset-password/:token
 // @desc    Resets user password with token
 // @access  Public
-const resetPassword = catchAsync(async (req, res, next) => {})
+const resetPassword = catchAsync(async (req, res, next) => {
+  // Validate body
+  resetPasswordSchema.parse(req.body)
+
+  // Find user
+  const user = await prisma.user.findFirst({
+    where: {
+      resetPasswordToken: req.params.token,
+    },
+    select: {
+      id: true,
+      resetPasswordToken: true,
+      resetPasswordTokenExpires: true,
+    },
+  })
+
+  // Check if user with token exists or token has expired
+  if (
+    !user ||
+    (user?.resetPasswordTokenExpires &&
+      new Date() > user?.resetPasswordTokenExpires)
+  ) {
+    return res
+      .status(responseService.statusCodes.badRequest)
+      .json(responseService.badRequestError('Token is invalid or expired.'))
+  }
+
+  // If token is valid and not expired, set the new password
+  await prisma.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      password: req.body.password,
+      resetPasswordToken: null,
+      resetPasswordTokenExpires: null,
+    },
+  })
+
+  // Respond
+  res
+    .status(responseService.statusCodes.ok)
+    .json(responseService.success('Password successfully reset!', {}))
+})
 
 ///////////////////
 // Protected Routes

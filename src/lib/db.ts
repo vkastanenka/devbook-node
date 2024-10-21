@@ -1,5 +1,5 @@
 // utils
-import bcrypt from 'bcryptjs'
+import { hashPassword } from './utils'
 import { PrismaClient } from '@prisma/client'
 
 const prismaClientSingleton = () => {
@@ -7,18 +7,18 @@ const prismaClientSingleton = () => {
     query: {
       user: {
         async create({ model, operation, args, query }) {
-          args.data.password = await bcrypt.hash(
-            args.data.password as string,
-            12
+          const hashedPassword = await hashPassword(
+            args.data.password as string
           )
+          args.data.password = hashedPassword
           return query(args)
         },
         async update({ model, operation, args, query }) {
           if (args.data.password) {
-            args.data.password = await bcrypt.hash(
-              args.data.password as string,
-              12
+            const hashedPassword = await hashPassword(
+              args.data.password as string
             )
+            args.data.password = hashedPassword
           }
           args.data.updatedAt = new Date()
           return query(args)
