@@ -109,10 +109,10 @@ const protect = catchAsync(
       return
     }
 
-    // Check if user changed password after the token was issued TODO
+    // Check if user changed password after the token was issued
     if (
       currentUser.passwordUpdatedAt &&
-      currentUser.passwordUpdatedAt < new Date()
+      currentUser.passwordUpdatedAt > session.expires
     ) {
       res
         .status(responseService.statusCodes.unauthorized)

@@ -24,21 +24,6 @@ router.get('/test', userController.test)
 // @access  Public
 router.get('/user/:id', userController.getUser)
 
-///////////////////
-// Protected Routes
-
-router.use(authController.protect)
-
-// @route   GET api/v1/users/current-user
-// @desc    Returns user associated with JWT
-// @access  Protected
-router.get('/current-user', userController.getCurrentUser)
-
-////////////////////
-// Restricted Routes
-
-router.use(authController.restrictTo([UserRole.ADMIN]))
-
 // @route   GET api/v1/users/user
 // @desc    Get all users
 // @access  Public
@@ -58,5 +43,20 @@ router.patch('/user/:id', userController.updateUser)
 // @desc    Deletes user matching id
 // @access  Public
 router.delete('/user/:id', userController.deleteUser)
+
+///////////////////
+// Protected Routes
+
+router.use(authController.protect)
+
+// @route   GET api/v1/users/current-user
+// @desc    Returns user associated with JWT
+// @access  Protected
+router.get('/current-user', userController.getCurrentUser)
+
+////////////////////
+// Restricted Routes
+
+router.use(authController.restrictTo([UserRole.ADMIN]))
 
 export const userRouter = router
