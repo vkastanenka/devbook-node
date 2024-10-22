@@ -30,9 +30,14 @@ router.post('/login', authController.login)
 // @access  Public
 router.post('/send-reset-password-token', authController.sendResetPasswordToken)
 
-// @route   PATCH api/v1/users/reset-password/:token
+// @route   PATCH api/v1/auth/reset-password/:token
 // @desc    Resets user password with token
 // @access  Public
 router.patch('/reset-password/:token', authController.resetPassword)
+
+// @route   DELETE api/v1/auth/session/:id
+// @desc    Deletes session matching id
+// @access  Public
+router.delete('/session/:id', authController.deleteSession)
 
 export const authRouter = router

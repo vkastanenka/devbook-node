@@ -19,6 +19,11 @@ const router = express.Router()
 // @access  Public
 router.get('/test', userController.test)
 
+// @route   GET api/v1/users/user/:id
+// @desc    Returns user matching id parameter
+// @access  Public
+router.get('/user/:id', userController.getUser)
+
 ///////////////////
 // Protected Routes
 
@@ -34,20 +39,15 @@ router.get('/current-user', userController.getCurrentUser)
 
 router.use(authController.restrictTo([UserRole.ADMIN]))
 
-// @route   GET api/v1/users/user/:id
-// @desc    Returns user matching id parameter
-// @access  Public
-router.get('/user/:id', userController.getUser)
-
-// @route   GET api/v1/users
+// @route   GET api/v1/users/user
 // @desc    Get all users
 // @access  Public
-router.get('', userController.getAllUsers)
+router.get('/user', userController.getAllUsers)
 
-// @route   POST api/v1/users
+// @route   POST api/v1/users/user
 // @desc    Creates user
 // @access  Public
-router.post('', userController.postUser)
+router.post('/user', userController.postUser)
 
 // @route   PATCH api/v1/users/user/:id
 // @desc    Updates user matching id

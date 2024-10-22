@@ -6,6 +6,7 @@ const prismaClientSingleton = () => {
   return new PrismaClient().$extends({
     query: {
       user: {
+        // TODO: Find out how to query user without password
         async create({ model, operation, args, query }) {
           const hashedPassword = await hashPassword(
             args.data.password as string

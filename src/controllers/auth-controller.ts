@@ -18,6 +18,7 @@ import {
   sendResetPasswordTokenSchema,
   resetPasswordSchema,
 } from '../lib/validation/auth'
+import { controllerFactory } from '../lib/controller-factory'
 
 // Privatizes routes and makes accessible only to users with valid jwt session token
 const protect = catchAsync(
@@ -383,6 +384,9 @@ const resetPassword = catchAsync(async (req, res, next) => {
   return
 })
 
+// Deletes session
+const deleteSession = controllerFactory.deleteRecord(prisma.session)
+
 export const authController = {
   protect,
   restrictTo,
@@ -391,4 +395,5 @@ export const authController = {
   login,
   sendResetPasswordToken,
   resetPassword,
+  deleteSession,
 }
