@@ -1,103 +1,108 @@
+const statusCodes = {
+  ok: 200,
+  created: 201,
+  accepted: 202,
+  noContent: 204,
+  badRequest: 400,
+  unauthorized: 401,
+  forbidden: 403,
+  notFound: 404,
+  internalServerError: 500,
+  serviceUnavailable: 503,
+}
+
+const createResponse = (data: {
+  message: string
+  success: boolean
+  status: number
+  data?: any
+  errors?: { [key: string]: string }
+}) => {
+  return { ...data }
+}
+
+const ok = (data: { message: string; data?: any }) => {
+  return createResponse({
+    success: true,
+    status: statusCodes.ok,
+    ...data,
+  })
+}
+
+const created = (data: { message: string; data: any }) => {
+  return createResponse({
+    success: true,
+    status: statusCodes.created,
+    ...data,
+  })
+}
+
+const noContent = (data: { message: string }) => {
+  return createResponse({
+    success: true,
+    status: statusCodes.noContent,
+    ...data,
+  })
+}
+
+const badRequest = (data: { errors: { [key: string | number]: string } }) => {
+  return createResponse({
+    success: false,
+    status: statusCodes.badRequest,
+    message: 'Bad request!',
+    ...data,
+  })
+}
+
+const unauthorized = (data: { message: string }) => {
+  return createResponse({
+    success: false,
+    status: statusCodes.unauthorized,
+    ...data,
+  })
+}
+
+const forbidden = () => {
+  return createResponse({
+    success: false,
+    status: statusCodes.forbidden,
+    message: 'You do not have permission to perform this action!',
+  })
+}
+
+const notFound = (data: { message: string }) => {
+  return createResponse({
+    success: false,
+    status: statusCodes.notFound,
+    ...data,
+  })
+}
+
+const internalServerError = (data?: { message?: string }) => {
+  return createResponse({
+    success: false,
+    status: statusCodes.internalServerError,
+    message: data?.message || 'Internal server error!',
+  })
+}
+
+const serviceUnavailable = () => {
+  return createResponse({
+    success: false,
+    status: statusCodes.serviceUnavailable,
+    message: 'Service unavailable!',
+  })
+}
+
 export const responseService = {
-  statusCodes: {
-    ok: 200,
-    created: 201,
-    accepted: 202,
-    noContent: 204,
-    badRequest: 400,
-    unauthorized: 401,
-    forbidden: 403,
-    notFound: 404,
-    internalServerError: 500,
-    serviceUnavailable: 503,
-  },
-
-  success(message: string, data: any) {
-    return {
-      success: true,
-      message,
-      data,
-      status: this.statusCodes.ok,
-    }
-  },
-
-  createdSuccess(message: string, data: any) {
-    return {
-      success: true,
-      message,
-      data,
-      status: this.statusCodes.created,
-    }
-  },
-
-  noContentSuccess(message: string) {
-    return {
-      success: true,
-      message,
-      status: this.statusCodes.created,
-    }
-  },
-
-  error(message: string, error: string) {
-    return {
-      success: false,
-      message,
-      error,
-      status: this.statusCodes.badRequest,
-    }
-  },
-
-  badRequestError(message: string) {
-    return {
-      success: false,
-      message,
-      error: 'Bad request',
-      status: this.statusCodes.badRequest,
-    }
-  },
-
-  unauthorizedError(message: string) {
-    return {
-      success: false,
-      message,
-      error: 'Unauthorized',
-      status: this.statusCodes.unauthorized,
-    }
-  },
-
-  forbiddenError(message: string) {
-    return {
-      success: false,
-      message,
-      error: 'Forbidden',
-      status: this.statusCodes.forbidden,
-    }
-  },
-
-  notFoundError(message: string) {
-    return {
-      success: false,
-      message,
-      error: 'Not found',
-      status: this.statusCodes.notFound,
-    }
-  },
-
-  internalServerError(message: string) {
-    return {
-      success: false,
-      message,
-      error: 'Internal server error',
-      status: this.statusCodes.internalServerError,
-    }
-  },
-
-  serviceUnavailableError(message: string) {
-    return {
-      success: false,
-      message,
-      error: 'Service unavailable',
-      status: this.statusCodes.serviceUnavailable,
-    }
-  },
+  statusCodes,
+  ok,
+  created,
+  noContent,
+  badRequest,
+  unauthorized,
+  forbidden,
+  notFound,
+  internalServerError,
+  serviceUnavailable,
 }

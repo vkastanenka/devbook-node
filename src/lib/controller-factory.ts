@@ -8,11 +8,12 @@ const createRecord = (Model: any) =>
     const record = await Model.create({ data: req.body })
 
     // Respond
-    res
-      .status(responseService.statusCodes.created)
-      .json(
-        responseService.createdSuccess('Successfully created record!', record)
-      )
+    res.status(responseService.statusCodes.created).json(
+      responseService.created({
+        message: 'Successfully created record!',
+        data: record,
+      })
+    )
   })
 
 const readRecord = (Model: any) =>
@@ -26,17 +27,20 @@ const readRecord = (Model: any) =>
 
     // If no record, respond with an error
     if (!record) {
-      return res
-        .status(responseService.statusCodes.notFound)
-        .json(
-          responseService.notFoundError('No record found with provided id!')
-        )
+      return res.status(responseService.statusCodes.notFound).json(
+        responseService.notFound({
+          message: 'No record found with provided id!',
+        })
+      )
     }
 
     // Respond
-    res
-      .status(responseService.statusCodes.ok)
-      .json(responseService.success('Successfully found record!', record))
+    res.status(responseService.statusCodes.ok).json(
+      responseService.ok({
+        message: 'Successfully found record!',
+        data: record,
+      })
+    )
   })
 
 const readAllRecords = (Model: any) =>
@@ -45,9 +49,12 @@ const readAllRecords = (Model: any) =>
     const records = await Model.findMany()
 
     // Respond
-    res
-      .status(responseService.statusCodes.ok)
-      .json(responseService.success('Successfully found all records!', records))
+    res.status(responseService.statusCodes.ok).json(
+      responseService.ok({
+        message: 'Successfully found all records!',
+        data: records,
+      })
+    )
   })
 
 const updateRecord = (Model: any) =>
@@ -61,11 +68,12 @@ const updateRecord = (Model: any) =>
     })
 
     // Respond
-    res
-      .status(responseService.statusCodes.ok)
-      .json(
-        responseService.success('Successfully updated record!', updatedRecord)
-      )
+    res.status(responseService.statusCodes.ok).json(
+      responseService.ok({
+        message: 'Successfully updated record!',
+        data: updatedRecord,
+      })
+    )
   })
 
 const deleteRecord = (Model: any) =>
@@ -80,7 +88,9 @@ const deleteRecord = (Model: any) =>
     // Respond
     res
       .status(responseService.statusCodes.noContent)
-      .json(responseService.noContentSuccess('Successfully deleted record!'))
+      .json(
+        responseService.noContent({ message: 'Successfully deleted record!' })
+      )
   })
 
 export const controllerFactory = {

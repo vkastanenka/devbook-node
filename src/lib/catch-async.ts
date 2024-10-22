@@ -16,16 +16,17 @@ export const catchAsync = (
   return (req: Request, res: Response, next: NextFunction) => {
     fn(req, res, next).catch((e) => {
       if (e instanceof ZodError) {
-        const errorMessages = e.errors.map((issue: any) => ({
-          [issue.path.join('.')]: issue.message,
-        }))
+        const errors: { [key: string | number]: string } = {}
+        e.errors.forEach((issue: any) => {
+          errors[issue.path.join('.')] = issue.message
+        })
         res
           .status(responseService.statusCodes.badRequest)
-          .json(responseService.badRequestError(JSON.stringify(errorMessages)))
+          .json(responseService.badRequest({ errors }))
       } else {
         res
           .status(responseService.statusCodes.internalServerError)
-          .json(responseService.internalServerError(''))
+          .json(responseService.internalServerError())
       }
 
       next()

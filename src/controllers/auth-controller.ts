@@ -31,13 +31,11 @@ const protect = catchAsync(
 
     // Check if the token exists
     if (!token) {
-      res
-        .status(responseService.statusCodes.unauthorized)
-        .json(
-          responseService.unauthorizedError(
-            'You are not logged in! Please log in to gain access!'
-          )
-        )
+      res.status(responseService.statusCodes.unauthorized).json(
+        responseService.unauthorized({
+          message: 'You are not logged in! Please log in to gain access!',
+        })
+      )
       return
     }
 
@@ -49,13 +47,11 @@ const protect = catchAsync(
 
     // Check if session is expired
     if (decodedJwt.expires < new Date()) {
-      res
-        .status(responseService.statusCodes.unauthorized)
-        .json(
-          responseService.unauthorizedError(
-            'Access token is expired. Please log in again!'
-          )
-        )
+      res.status(responseService.statusCodes.unauthorized).json(
+        responseService.unauthorized({
+          message: 'Access token is expired. Please log in again!',
+        })
+      )
       return
     }
 
@@ -68,25 +64,21 @@ const protect = catchAsync(
 
     // Check if the session exists
     if (!session) {
-      res
-        .status(responseService.statusCodes.notFound)
-        .json(
-          responseService.notFoundError(
-            'Error locating session. Please log in again!'
-          )
-        )
+      res.status(responseService.statusCodes.notFound).json(
+        responseService.notFound({
+          message: 'Error locating session. Please log in again!',
+        })
+      )
       return
     }
 
     // Check if the session is expired
     if (session.expires < new Date()) {
-      res
-        .status(responseService.statusCodes.notFound)
-        .json(
-          responseService.notFoundError(
-            'Session has expired. Please log in again!'
-          )
-        )
+      res.status(responseService.statusCodes.unauthorized).json(
+        responseService.unauthorized({
+          message: 'Session has expired. Please log in again!',
+        })
+      )
       return
     }
 
@@ -99,13 +91,11 @@ const protect = catchAsync(
 
     // Check if current user still exists
     if (!currentUser) {
-      res
-        .status(responseService.statusCodes.notFound)
-        .json(
-          responseService.notFoundError(
-            'The user related to this token no longer exists!'
-          )
-        )
+      res.status(responseService.statusCodes.notFound).json(
+        responseService.notFound({
+          message: 'The user related to this token no longer exists!',
+        })
+      )
       return
     }
 
@@ -114,13 +104,12 @@ const protect = catchAsync(
       currentUser.passwordUpdatedAt &&
       currentUser.passwordUpdatedAt > session.expires
     ) {
-      res
-        .status(responseService.statusCodes.unauthorized)
-        .json(
-          responseService.unauthorizedError(
-            'User has recently changed their password! Please log in again!'
-          )
-        )
+      res.status(responseService.statusCodes.unauthorized).json(
+        responseService.unauthorized({
+          message:
+            'User has recently changed their password! Please log in again!',
+        })
+      )
       return
     }
 
@@ -137,11 +126,7 @@ const restrictTo = (roles: string[]) => {
     if (req.user && !roles.includes(req.user.role)) {
       res
         .status(responseService.statusCodes.forbidden)
-        .json(
-          responseService.forbiddenError(
-            'You do not have permission to perform this action!'
-          )
-        )
+        .json(responseService.forbidden())
       return
     }
 
@@ -158,6 +143,9 @@ const test = (req: Request, res: Response, next: NextFunction) => {
 // Register user
 const register = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    // Prepare for potential bad request errors
+    const errors: { [key: string]: string } = {}
+
     // Validate body
     registrationSchema.parse(req.body)
 
@@ -166,22 +154,20 @@ const register = catchAsync(
       where: { email: req.body.email },
     })
 
-    if (emailCheck) {
-      res
-        .status(responseService.statusCodes.badRequest)
-        .json(responseService.badRequestError('Email taken!'))
-      return
-    }
+    if (emailCheck) errors.email = 'Email taken!'
 
     // Check if username is taken
     const usernameCheck = await prisma.user.findUnique({
       where: { username: req.body.username },
     })
 
-    if (usernameCheck) {
+    if (usernameCheck) errors.username = 'Username taken!'
+
+    // If any bad request errors, send response
+    if (Object.keys(errors).length) {
       res
         .status(responseService.statusCodes.badRequest)
-        .json(responseService.badRequestError('Username taken!'))
+        .json(responseService.badRequest({ errors }))
       return
     }
 
@@ -191,9 +177,12 @@ const register = catchAsync(
     })
 
     // Respond
-    res
-      .status(responseService.statusCodes.created)
-      .json(responseService.createdSuccess('Registration successful!', newUser))
+    res.status(responseService.statusCodes.created).json(
+      responseService.created({
+        message: 'Registration successful!',
+        data: newUser,
+      })
+    )
     return
   }
 )
@@ -201,6 +190,9 @@ const register = catchAsync(
 // Login User / JWT Response
 const login = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    // Prepare for potential bad request errors
+    const errors: { [key: string]: string } = {}
+
     // Validate body
     loginSchema.parse(req.body)
 
@@ -217,13 +209,12 @@ const login = catchAsync(
 
     // Res with error if no user or passwords don't match
     if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
+      const errorMessage = 'Email and/or password are incorrect.'
+      errors.email = errorMessage
+      errors.password = errorMessage
       res
         .status(responseService.statusCodes.badRequest)
-        .json(
-          responseService.badRequestError(
-            'Email and/or password are incorrect.'
-          )
-        )
+        .json(responseService.badRequest({ errors }))
       return
     }
 
@@ -252,7 +243,7 @@ const login = catchAsync(
     // Respond
     res
       .status(responseService.statusCodes.ok)
-      .json(responseService.success('Login successful!', jwt))
+      .json(responseService.ok({ message: 'Login successful!', data: jwt }))
     return
   }
 )
@@ -271,11 +262,11 @@ const sendResetPasswordToken = catchAsync(
     })
 
     if (!user) {
-      res
-        .status(responseService.statusCodes.notFound)
-        .json(
-          responseService.notFoundError('No user found with provided email!')
-        )
+      res.status(responseService.statusCodes.notFound).json(
+        responseService.notFound({
+          message: 'No user found with provided email!',
+        })
+      )
       return
     }
 
@@ -307,7 +298,7 @@ const sendResetPasswordToken = catchAsync(
       res
         .status(responseService.statusCodes.ok)
         .json(
-          responseService.success('Reset password token send to email!', {})
+          responseService.ok({ message: 'Reset password token send to email!' })
         )
       return
     } catch (err) {
@@ -323,13 +314,12 @@ const sendResetPasswordToken = catchAsync(
       })
 
       // Respond
-      res
-        .status(responseService.statusCodes.internalServerError)
-        .json(
-          responseService.internalServerError(
-            'There was a problem sending the email, please try again later!'
-          )
-        )
+      res.status(responseService.statusCodes.internalServerError).json(
+        responseService.internalServerError({
+          message:
+            'There was a problem sending the email, please try again later!',
+        })
+      )
       return
     }
   }
@@ -358,9 +348,11 @@ const resetPassword = catchAsync(async (req, res, next) => {
     (user?.resetPasswordTokenExpires &&
       new Date() > user?.resetPasswordTokenExpires)
   ) {
-    res
-      .status(responseService.statusCodes.badRequest)
-      .json(responseService.badRequestError('Token is invalid or expired.'))
+    res.status(responseService.statusCodes.unauthorized).json(
+      responseService.unauthorized({
+        message: 'Token is invalid or expired.',
+      })
+    )
     return
   }
 
@@ -380,7 +372,7 @@ const resetPassword = catchAsync(async (req, res, next) => {
   // Respond
   res
     .status(responseService.statusCodes.ok)
-    .json(responseService.success('Password successfully reset!', {}))
+    .json(responseService.ok({ message: 'Password successfully reset!' }))
   return
 })
 

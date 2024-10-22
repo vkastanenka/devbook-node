@@ -17,14 +17,17 @@ const test = (req: Request, res: Response, next: NextFunction) => {
 // Returns user associated with JWT
 const getCurrentUser = (req: Request, res: Response, next: NextFunction) => {
   if (req.user) {
-    res
-      .status(responseService.statusCodes.ok)
-      .json(responseService.success('Found current user!', req.user))
+    res.status(responseService.statusCodes.ok).json(
+      responseService.ok({
+        message: 'Found current user!',
+        data: req.user,
+      })
+    )
     return
   } else {
     res
       .status(responseService.statusCodes.notFound)
-      .json(responseService.success('Current user not found!', req.user))
+      .json(responseService.notFound({ message: 'Current user not found!' }))
     return
   }
 }
