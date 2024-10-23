@@ -22,18 +22,18 @@ router.get('/test', userController.test)
 // @route   GET api/v1/users/user/:id
 // @desc    Returns user matching id parameter
 // @access  Public
-router.get('/user/:id', userController.getUser)
+router.get('/user/:q', userController.getUser)
 
 
 // @route   GET api/v1/users/users/:q
-// @desc    Returns user associated with JWT
-// @access  Protected
+// @desc    Returns many users whose name or username contains q
+// @access  Public
 router.get('/users/:q', userController.getUsers)
 
 // @route   GET api/v1/users/user
 // @desc    Get all users
 // @access  Public
-router.get('/user', userController.getAllUsers)
+router.get('/users', userController.getAllUsers)
 
 // @route   POST api/v1/users/user
 // @desc    Creates user

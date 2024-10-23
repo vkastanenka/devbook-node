@@ -15,12 +15,6 @@ const test = (req: Request, res: Response, next: NextFunction) => {
   return
 }
 
-// Gets user matching id
-const getUser = controllerFactory.readRecord(prisma.user)
-
-// Get many users
-const getManyUsers = controllerFactory
-
 // Get all users
 const getAllUsers = controllerFactory.readAllRecords(prisma.user)
 
@@ -50,6 +44,42 @@ const getCurrentUser = (req: Request, res: Response, next: NextFunction) => {
     return
   }
 }
+
+// Gets user matching id or handle
+const getUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { q } = req.params
+
+    const users = await prisma.user.findMany({
+      where: {
+        OR: [
+          {
+            id: {
+              equals: q,
+            },
+          },
+          {
+            username: {
+              equals: q,
+            },
+          },
+        ],
+      },
+    })
+
+    if (!users?.length) {
+      res
+        .status(responseService.statusCodes.notFound)
+        .json(responseService.notFound({ message: 'No user found!' }))
+      return
+    }
+
+    res
+      .status(responseService.statusCodes.ok)
+      .json(responseService.ok({ message: 'User found!', data: users[0] }))
+    return
+  }
+)
 
 // Returns users found with provided query
 const getUsers = catchAsync(
