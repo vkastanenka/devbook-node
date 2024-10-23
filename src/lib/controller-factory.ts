@@ -91,6 +91,7 @@ const deleteRecord = (Model: any) =>
       .json(
         responseService.noContent({ message: 'Successfully deleted record!' })
       )
+    return
   })
 
 export const controllerFactory = {

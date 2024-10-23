@@ -70,7 +70,10 @@ const forbidden = () => {
   })
 }
 
-const notFound = (data: { message: string }) => {
+const notFound = (data: {
+  message: string
+  errors?: { [key: string | number]: string }
+}) => {
   return createResponse({
     success: false,
     status: statusCodes.notFound,

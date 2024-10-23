@@ -143,7 +143,7 @@ const test = (req: Request, res: Response, next: NextFunction) => {
 // Register user
 const register = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    // Prepare for potential bad request errors
+    // Prepare for potential errors
     const errors: { [key: string]: string } = {}
 
     // Validate body
@@ -190,7 +190,7 @@ const register = catchAsync(
 // Login User / JWT Response
 const login = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    // Prepare for potential bad request errors
+    // Prepare for potential errors
     const errors: { [key: string]: string } = {}
 
     // Validate body
@@ -225,6 +225,17 @@ const login = catchAsync(
       },
     })
 
+    // Delete password reset data if present
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        resetPasswordToken: null,
+        resetPasswordTokenExpires: null,
+      },
+    })
+
     // Create user session
     const session = await prisma.session.create({
       data: {
@@ -243,7 +254,7 @@ const login = catchAsync(
     // Respond
     res
       .status(responseService.statusCodes.ok)
-      .json(responseService.ok({ message: 'Login successful!', data: jwt }))
+      .json(responseService.ok({ message: 'Login successful!', data: { jwt } }))
     return
   }
 )
@@ -251,6 +262,9 @@ const login = catchAsync(
 // Send email with a reset password token
 const sendResetPasswordToken = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    // Prepare for potential errors
+    const errors: { [key: string]: string } = {}
+
     // Validate body
     sendResetPasswordTokenSchema.parse(req.body)
 
@@ -262,9 +276,11 @@ const sendResetPasswordToken = catchAsync(
     })
 
     if (!user) {
+      errors.email = 'No user found with provided email!'
       res.status(responseService.statusCodes.notFound).json(
         responseService.notFound({
-          message: 'No user found with provided email!',
+          message: 'User not found.',
+          errors,
         })
       )
       return

@@ -57,6 +57,6 @@ router.get('/current-user', userController.getCurrentUser)
 ////////////////////
 // Restricted Routes
 
-router.use(authController.restrictTo([UserRole.ADMIN]))
+// router.use(authController.restrictTo([UserRole.ADMIN]))
 
 export const userRouter = router
