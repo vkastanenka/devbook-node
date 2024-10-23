@@ -204,6 +204,8 @@ const login = catchAsync(
       select: {
         id: true,
         password: true,
+        resetPasswordToken: true,
+        resetPasswordTokenExpires: true,
       },
     })
 
@@ -225,16 +227,18 @@ const login = catchAsync(
       },
     })
 
-    // Delete password reset data if present
-    await prisma.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        resetPasswordToken: null,
-        resetPasswordTokenExpires: null,
-      },
-    })
+    if (user.resetPasswordToken || user.resetPasswordTokenExpires) {
+      // Delete password reset data if present
+      await prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          resetPasswordToken: null,
+          resetPasswordTokenExpires: null,
+        },
+      })
+    }
 
     // Create user session
     const session = await prisma.session.create({
@@ -304,7 +308,7 @@ const sendResetPasswordToken = catchAsync(
 
     try {
       // Send an email with a link to a form to reset the user's password
-      const resetPasswordUrl = `http://localhost:3000/reset-password/${tokenHashed}`
+      const resetPasswordUrl = `http://localhost:3000/reset-password/?token=${tokenHashed}`
       await sendResetPasswordTokenEmail({
         to: user.email,
         url: resetPasswordUrl,
