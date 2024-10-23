@@ -24,6 +24,12 @@ router.get('/test', userController.test)
 // @access  Public
 router.get('/user/:id', userController.getUser)
 
+
+// @route   GET api/v1/users/users/:q
+// @desc    Returns user associated with JWT
+// @access  Protected
+router.get('/users/:q', userController.getUsers)
+
 // @route   GET api/v1/users/user
 // @desc    Get all users
 // @access  Public

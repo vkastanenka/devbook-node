@@ -1,4 +1,5 @@
 // controllers
+import { catchAsync } from '../lib/catch-async'
 import { controllerFactory } from '../lib/controller-factory'
 
 // utils
@@ -13,6 +14,24 @@ const test = (req: Request, res: Response, next: NextFunction) => {
   res.json({ message: 'Users route secured' })
   return
 }
+
+// Gets user matching id
+const getUser = controllerFactory.readRecord(prisma.user)
+
+// Get many users
+const getManyUsers = controllerFactory
+
+// Get all users
+const getAllUsers = controllerFactory.readAllRecords(prisma.user)
+
+// Creates user
+const postUser = controllerFactory.createRecord(prisma.user)
+
+// Updates user matching id
+const updateUser = controllerFactory.updateRecord(prisma.user)
+
+// Deletes user matching id
+const deleteUser = controllerFactory.deleteRecord(prisma.user)
 
 // Returns user associated with JWT
 const getCurrentUser = (req: Request, res: Response, next: NextFunction) => {
@@ -32,27 +51,54 @@ const getCurrentUser = (req: Request, res: Response, next: NextFunction) => {
   }
 }
 
-// Gets user matching id
-const getUser = controllerFactory.readRecord(prisma.user)
+// Returns users found with provided query
+const getUsers = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { q } = req.params
 
-// Get all users
-const getAllUsers = controllerFactory.readAllRecords(prisma.user)
+    const users = await prisma.user.findMany({
+      orderBy: [
+        {
+          name: 'desc',
+        },
+      ],
+      where: {
+        OR: [
+          {
+            name: {
+              contains: q,
+            },
+          },
+          {
+            username: {
+              contains: q,
+            },
+          },
+        ],
+      },
+    })
 
-// Creates user
-const postUser = controllerFactory.createRecord(prisma.user)
+    if (!users?.length) {
+      res
+        .status(responseService.statusCodes.notFound)
+        .json(responseService.notFound({ message: 'No results found!' }))
+      return
+    }
 
-// Updates user matching id
-const updateUser = controllerFactory.updateRecord(prisma.user)
-
-// Deletes user matching id
-const deleteUser = controllerFactory.deleteRecord(prisma.user)
+    res
+      .status(responseService.statusCodes.ok)
+      .json(responseService.ok({ message: 'Results found!', data: users }))
+    return
+  }
+)
 
 export const userController = {
   test,
-  getCurrentUser,
   getUser,
   getAllUsers,
   postUser,
   updateUser,
   deleteUser,
+  getCurrentUser,
+  getUsers,
 }
