@@ -13,46 +13,50 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// model Address {
-//   id           String   @id @default(uuid())
-//   unitNumber   String?  @map("unit_number")
-//   streetNumber String?  @map("street_number")
-//   streetName   String?  @map("street_name")
-//   suburbName   String?  @map("suburb_name")
-//   stateName    String?  @map("state_name")
-//   country      Country? @relation(fields: [countryId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-//   countryId    String?  @map("country_id")
+model Address {
+  id           String  @id @default(uuid())
+  unitNumber   String? @map("unit_number")
+  streetNumber String? @map("street_number")
+  streetName   String? @map("street_name")
+  suburbName   String? @map("suburb_name")
+  stateName    String? @map("state_name")
+  country      String?
 
-//   createdAt DateTime @default(now()) @map("created_at")
-//   updatedAt DateTime @default(now()) @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
 
-//   @@map("addresses")
-// }
+  User             User?           @relation(fields: [userId], references: [id])
+  userId           String?
+  UserExperience   UserExperience? @relation(fields: [userExperienceId], references: [id])
+  userExperienceId String?
 
-// TODO: See what fields we need for this model
-// model Attachment {
-//   id               String  @id @default(uuid())
-//   fileExtension    String? @map("file_extension")
-//   fileKey          String  @map("file_key")
-//   filename         String
-//   originalFilename String  @map("original_filename")
-//   user             User?   @relation(fields: [userId], references: [id])
-//   userId           String? @map("user_id")
-//   title            String?
-//   description      String? @db.Text()
-//   width            Int?
-//   height           Int?
+  @@map("addresses")
+}
 
-//   createdAt DateTime @default(now()) @map("created_at")
-//   updatedAt DateTime @default(now()) @map("updated_at")
+model Attachment {
+  id               String  @id @default(uuid())
+  fileExtension    String? @map("file_extension")
+  fileKey          String  @map("file_key")
+  filename         String
+  originalFilename String  @map("original_filename")
 
-//   Post      Post?    @relation(fields: [postId], references: [id])
-//   postId    String?
-//   Comment   Comment? @relation(fields: [commentId], references: [id])
-//   commentId String?
+  title       String?
+  description String? @db.Text()
+  width       Int?
+  height      Int?
 
-//   @@map("attachments")
-// }
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?  @map("user_id")
+  Post      Post?    @relation(fields: [postId], references: [id])
+  postId    String?  @map("post_id")
+  Comment   Comment? @relation(fields: [commentId], references: [id])
+  commentId String?  @map("comment_id")
+
+  @@map("attachments")
+}
 
 model Comment {
   id     String @id @default(uuid())
@@ -67,7 +71,7 @@ model Comment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  // attachments Attachment[]
+  attachments   Attachment[]
   commentLikes  CommentLike[]
   postsComments PostComment[]
 
@@ -88,19 +92,18 @@ model CommentLike {
   @@map("comment_likes")
 }
 
-// model Country {
-//   id    String @id @default(uuid())
-//   key   String @unique
-//   title String
+model Contact {
+  id        String @id @default(uuid())
+  user      User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  userId    String @map("user_id")
+  contact   User   @relation(name: "contact_contact", fields: [contactId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  contactId String @map("contact_id")
 
-//   createdAt DateTime @default(now()) @map("created_at")
-//   updatedAt DateTime @default(now()) @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
 
-//   addresses Address[]
-//   users     User[]
-
-//   @@map("countries")
-// }
+  @@map("contacts")
+}
 
 enum PostType {
   DEFAULT
@@ -111,17 +114,14 @@ enum PostType {
 model Post {
   id       String   @id @default(uuid())
   body     String   @db.Text()
-  // bodyData   Json?    @map("body_data") @db.JsonB()
   postType PostType @default(DEFAULT)
   user     User     @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   userId   String   @map("user_id")
-  // published  Boolean  @default(true) @map("published")
-  // isRichText Boolean  @default(false) @map("is_rich_text")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  // attachments  Attachment[]
+  attachments  Attachment[]
   postComments PostComment[]
   postLikes    PostLike[]
 
@@ -171,18 +171,17 @@ enum UserRole {
 }
 
 model User {
-  id            String    @id @default(uuid())
-  name          String
-  email         String    @unique
-  username      String    @unique
-  password      String
-  emailVerified DateTime? @map("email_verified")
-  image         String?
-  headline      String?
-  bio           String?   @db.Text
-
-  // country   Country? @relation(fields: [countryId], references: [id], onUpdate: Cascade, onDelete: SetNull)
-  // countryId String?  @map("country_id")
+  id                 String   @id @default(uuid())
+  name               String
+  email              String   @unique
+  username           String   @unique
+  password           String
+  image              String?
+  headline           String?
+  bio                String?  @db.Text
+  website            String?
+  githubRepositories String?  @map("github_repositories")
+  skills             String[]
 
   role UserRole @default(USER)
 
@@ -193,12 +192,57 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  // attachments  Attachment[]
-  comments     Comment[]
-  commentLikes CommentLike[]
-  posts        Post[]
-  postLikes    PostLike[]
-  sessions     Session[]
+  attachments     Attachment[]
+  addresses       Address[]
+  comments        Comment[]
+  commentLikes    CommentLike[]
+  posts           Post[]
+  postLikes       PostLike[]
+  sessions        Session[]
+  userEducations  UserEducation[]
+  userExperiences UserExperience[]
+  contacts        Contact[]
+  contactContacts Contact[]        @relation("contact_contact")
 
   @@map("users")
+}
+
+model UserEducation {
+  id        String  @id @default(uuid())
+  school    String
+  degree    String
+  startYear String
+  endYear   String?
+  current   Boolean @default(false)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  @@map("user_educations")
+}
+
+model UserExperience {
+  id          String   @id @default(uuid())
+  company     String
+  type        String
+  schedule    String
+  title       String
+  startYear   String
+  endYear     String?
+  current     Boolean  @default(false)
+  description String
+  skills      String[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  addresses Address[]
+
+  @@map("user_experiences")
 }
