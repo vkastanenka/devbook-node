@@ -16,10 +16,13 @@ const test = (req: Request, res: Response, next: NextFunction) => {
 }
 
 // Get all users
+const getUser = controllerFactory.readRecord(prisma.user)
+
+// Get all users
 const getAllUsers = controllerFactory.readAllRecords(prisma.user)
 
 // Creates user
-const postUser = controllerFactory.createRecord(prisma.user)
+const createUser = controllerFactory.createRecord(prisma.user)
 
 // Updates user matching id
 const updateUser = controllerFactory.updateRecord(prisma.user)
@@ -27,7 +30,7 @@ const updateUser = controllerFactory.updateRecord(prisma.user)
 // Deletes user matching id
 const deleteUser = controllerFactory.deleteRecord(prisma.user)
 
-// Returns user associated with JWT
+// Returns user associated with session JWT
 const getCurrentUser = (req: Request, res: Response, next: NextFunction) => {
   if (req.user) {
     res.status(responseService.statusCodes.ok).json(
@@ -45,63 +48,22 @@ const getCurrentUser = (req: Request, res: Response, next: NextFunction) => {
   }
 }
 
-// Gets user matching id or handle
-const getUser = catchAsync(
+// Returns models matching provided query
+const getUserDevbookSearch = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { q } = req.params
+    // TODO: Zod validation
 
     const users = await prisma.user.findMany({
       where: {
         OR: [
           {
             id: {
-              equals: q,
+              equals: req.params.q,
             },
           },
           {
             username: {
-              equals: q,
-            },
-          },
-        ],
-      },
-    })
-
-    if (!users?.length) {
-      res
-        .status(responseService.statusCodes.notFound)
-        .json(responseService.notFound({ message: 'No user found!' }))
-      return
-    }
-
-    res
-      .status(responseService.statusCodes.ok)
-      .json(responseService.ok({ message: 'User found!', data: users[0] }))
-    return
-  }
-)
-
-// Returns users found with provided query
-const getUsers = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { q } = req.params
-
-    const users = await prisma.user.findMany({
-      orderBy: [
-        {
-          name: 'desc',
-        },
-      ],
-      where: {
-        OR: [
-          {
-            name: {
-              contains: q,
-            },
-          },
-          {
-            username: {
-              contains: q,
+              equals: req.params.q,
             },
           },
         ],
@@ -122,13 +84,41 @@ const getUsers = catchAsync(
   }
 )
 
+// Gets user with relations
+const getUsernameWithRelations = catchAsync(
+  // TODO: Zod validation
+
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = await prisma.user.findUnique({
+      where: { username: req.params.username },
+      include: req.body,
+    })
+
+    if (!user) {
+      res
+        .status(responseService.statusCodes.notFound)
+        .json(responseService.notFound({ message: 'No user found!' }))
+      return
+    }
+
+    res.status(responseService.statusCodes.ok).json(
+      responseService.ok({
+        message: 'User found!',
+        data: user,
+      })
+    )
+    return
+  }
+)
+
 export const userController = {
   test,
   getUser,
   getAllUsers,
-  postUser,
+  createUser,
   updateUser,
   deleteUser,
   getCurrentUser,
-  getUsers,
+  getUserDevbookSearch,
+  getUsernameWithRelations,
 }
