@@ -30,6 +30,7 @@ model Address {
   UserExperience   UserExperience? @relation(fields: [userExperienceId], references: [id])
   userExperienceId String?
 
+  @@unique([userId, userExperienceId])
   @@map("addresses")
 }
 
@@ -55,6 +56,7 @@ model Attachment {
   Comment   Comment? @relation(fields: [commentId], references: [id])
   commentId String?  @map("comment_id")
 
+  @@unique([userId, postId, commentId])
   @@map("attachments")
 }
 
@@ -75,6 +77,7 @@ model Comment {
   commentLikes  CommentLike[]
   postsComments PostComment[]
 
+  @@unique([userId, parentCommentId])
   @@map("comments")
 }
 
@@ -91,20 +94,6 @@ model CommentLike {
 
   @@unique([commentId, userId])
   @@map("comment_likes")
-}
-
-model Contact {
-  id String @id @default(uuid())
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @map("updated_at")
-
-  contact   User   @relation(name: "contact_contact", fields: [contactId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  contactId String @map("contact_id")
-  user      User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  userId    String @map("user_id")
-
-  @@map("contacts")
 }
 
 enum PostType {
@@ -128,6 +117,7 @@ model Post {
   postComments PostComment[]
   postLikes    PostLike[]
 
+  @@unique([userId])
   @@map("posts")
 }
 
@@ -142,6 +132,7 @@ model PostComment {
   post      Post    @relation(fields: [postId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   postId    String  @map("post_id")
 
+  @@unique([commentId, postId])
   @@map("posts_comments")
 }
 
@@ -170,6 +161,7 @@ model Session {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @map("user_id")
 
+  @@unique([userId])
   @@map("sessions")
 }
 
@@ -200,6 +192,10 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
+  parentUser   User?   @relation("UserContacts", fields: [parentUserId], references: [id])
+  parentUserId String? @map("parent_user_id")
+  contacts     User[]  @relation("UserContacts")
+
   attachments     Attachment[]
   addresses       Address[]
   comments        Comment[]
@@ -209,9 +205,8 @@ model User {
   sessions        Session[]
   userEducations  UserEducation[]
   userExperiences UserExperience[]
-  contacts        Contact[]
-  contactContacts Contact[]        @relation("contact_contact")
 
+  @@unique([parentUserId])
   @@map("users")
 }
 
@@ -225,9 +220,11 @@ model UserEducation {
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String   @map("user_id")
 
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  @@unique([userId])
   @@map("user_educations")
 }
 
@@ -243,11 +240,14 @@ model UserExperience {
   description String
   skills      String[]
 
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @default(now()) @map("updated_at")
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String    @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
   addresses Address[]
 
+  @@unique([userId])
   @@map("user_experiences")
 }
