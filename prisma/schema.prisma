@@ -99,10 +99,10 @@ model Contact {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  user      User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  userId    String @map("user_id")
   contact   User   @relation(name: "contact_contact", fields: [contactId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   contactId String @map("contact_id")
+  user      User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  userId    String @map("user_id")
 
   @@map("contacts")
 }
