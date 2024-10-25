@@ -85,13 +85,13 @@ const getUserDevbookSearch = catchAsync(
 )
 
 // Gets user with relations
-const getUsernameWithRelations = catchAsync(
+const getUsername = catchAsync(
   // TODO: Zod validation
 
   async (req: Request, res: Response, next: NextFunction) => {
     const user = await prisma.user.findUnique({
       where: { username: req.params.username },
-      include: req.body,
+      ...(req.body.include ? { include: req.body.include } : {}),
     })
 
     if (!user) {
@@ -120,5 +120,5 @@ export const userController = {
   deleteUser,
   getCurrentUser,
   getUserDevbookSearch,
-  getUsernameWithRelations,
+  getUsername,
 }

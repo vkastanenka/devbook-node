@@ -19,30 +19,21 @@ const router = express.Router()
 // @access  Public
 router.get('/test', userController.test)
 
-///////////////////
-// Protected Routes
-
-router.use(authController.protect)
-
-// @route   GET api/v1/users/current-user
-// @desc    Returns user associated with JWT
-// @access  Protected
-router.get('/current-user', userController.getCurrentUser)
+// TODO: Move to protected
 
 // @route   GET api/v1/users/devbook-search/:q
 // @desc    Returns multiple types of models matching the query
 // @access  Protected
 router.get('/devbook-search/:q', userController.getUserDevbookSearch)
 
-// @route   GET api/v1/users/username/:username
+// @route   POST api/v1/users/username/:username
 // @desc    Gets user with relations
 // @access  Protected
-router.get('/username/:username', userController.getUsernameWithRelations)
+router.post('/username/:username', userController.getUsername)
 
-////////////////////
-// Restricted Routes
+//
 
-// router.use(authController.restrictTo([UserRole.ADMIN]))
+// TODO: Move to restricted
 
 // @route   GET api/v1/users/user/:id
 // @desc    Returns user matching id parameter
@@ -68,5 +59,22 @@ router.patch('/user/:id', userController.updateUser)
 // @desc    Deletes user matching id
 // @access  Public
 router.delete('/user/:id', userController.deleteUser)
+
+//
+
+///////////////////
+// Protected Routes
+
+router.use(authController.protect)
+
+// @route   GET api/v1/users/current-user
+// @desc    Returns user associated with JWT
+// @access  Protected
+router.get('/current-user', userController.getCurrentUser)
+
+////////////////////
+// Restricted Routes
+
+// router.use(authController.restrictTo([UserRole.ADMIN]))
 
 export const userRouter = router

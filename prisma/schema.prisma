@@ -170,6 +170,8 @@ model User {
   email              String   @unique
   username           String   @unique
   password           String
+  phone              String?
+  pronouns           String?
   image              String?
   headline           String?
   bio                String?  @db.Text
