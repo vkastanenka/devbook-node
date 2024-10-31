@@ -10,21 +10,19 @@ datasource db {
 model Address {
   id           String  @id @default(uuid())
   unitNumber   String? @map("unit_number")
-  streetNumber String? @map("street_number")
-  streetName   String? @map("street_name")
-  suburbName   String? @map("suburb_name")
-  stateName    String? @map("state_name")
-  country      String?
+  streetNumber String  @map("street_number")
+  streetName   String  @map("street_name")
+  suburb       String
+  state        String
+  country      String
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  User             User?           @relation(fields: [userId], references: [id])
-  userId           String?         @map("user_id")
-  UserExperience   UserExperience? @relation(fields: [userExperienceId], references: [id])
-  userExperienceId String?         @map("user_experience_id")
+  User   User?   @relation(fields: [userId], references: [id])
+  userId String? @map("user_id")
 
-  @@unique([userId, userExperienceId])
+  @@unique([userId])
   @@map("addresses")
 }
 
@@ -206,9 +204,8 @@ model UserEducation {
   id        String  @id @default(uuid())
   school    String
   degree    String
-  startYear String? @map("start_year")
+  startYear String  @map("start_year")
   endYear   String? @map("end_year")
-  current   Boolean @default(false)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
@@ -216,7 +213,6 @@ model UserEducation {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @map("user_id")
 
-  @@unique([userId])
   @@map("user_educations")
 }
 
@@ -226,9 +222,8 @@ model UserExperience {
   type        String
   schedule    String
   title       String
-  startYear   String?  @map("start_year")
+  startYear   String   @map("start_year")
   endYear     String?  @map("end_year")
-  current     Boolean  @default(false)
   description String
   skills      String[]
 
@@ -238,8 +233,5 @@ model UserExperience {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @map("user_id")
 
-  addresses Address[]
-
-  @@unique([userId])
   @@map("user_experiences")
 }
