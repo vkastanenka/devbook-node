@@ -59,17 +59,18 @@ model Comment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  user            User      @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  userId          String    @map("user_id")
-  parentComment   Comment?  @relation("CommentSubComments", fields: [parentCommentId], references: [id])
-  parentCommentId String?   @map("parent_comment_id")
-  subComments     Comment[] @relation("CommentSubComments")
+  parentComment   Comment? @relation("CommentSubComments", fields: [parentCommentId], references: [id])
+  parentCommentId String?  @map("parent_comment_id")
+  post            Post     @relation(fields: [postId], references: [id])
+  postId          String   @map("post_id")
+  user            User     @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  userId          String   @map("user_id")
 
-  attachments   Attachment[]
-  commentLikes  CommentLike[]
-  postsComments PostComment[]
+  attachments  Attachment[]
+  commentLikes CommentLike[]
+  subComments  Comment[]     @relation("CommentSubComments")
 
-  @@unique([userId, parentCommentId])
+  @@unique([parentCommentId, postId, userId])
   @@map("comments")
 }
 
@@ -105,27 +106,12 @@ model Post {
   user   User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   userId String @map("user_id")
 
-  attachments  Attachment[]
-  postComments PostComment[]
-  postLikes    PostLike[]
+  attachments Attachment[]
+  comments    Comment[]
+  postLikes   PostLike[]
 
   @@unique([userId])
   @@map("posts")
-}
-
-model PostComment {
-  id String @id @default(uuid())
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @map("updated_at")
-
-  comment   Comment @relation(fields: [commentId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  commentId String  @map("comment_id")
-  post      Post    @relation(fields: [postId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  postId    String  @map("post_id")
-
-  @@unique([commentId, postId])
-  @@map("posts_comments")
 }
 
 model PostLike {
