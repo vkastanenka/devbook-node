@@ -191,6 +191,8 @@ model User {
   addresses       Address[]
   comments        Comment[]
   commentLikes    CommentLike[]
+  contacts        User[]           @relation("contacts")
+  contactsOf      User[]           @relation("contacts")
   posts           Post[]
   postLikes       PostLike[]
   sessions        Session[]

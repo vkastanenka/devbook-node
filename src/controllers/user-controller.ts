@@ -57,13 +57,15 @@ const getUserDevbookSearch = catchAsync(
       where: {
         OR: [
           {
-            id: {
-              equals: req.params.q,
+            name: {
+              contains: req.params.q,
+              mode: 'insensitive',
             },
           },
           {
             username: {
-              equals: req.params.q,
+              contains: req.params.q,
+              mode: 'insensitive',
             },
           },
         ],
