@@ -19,7 +19,7 @@ model Address {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  User   User?   @relation(fields: [userId], references: [id])
+  User   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String? @map("user_id")
 
   @@unique([userId])
@@ -59,18 +59,17 @@ model Comment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  parentComment   Comment? @relation("CommentSubComments", fields: [parentCommentId], references: [id])
+  parentComment   Comment? @relation("CommentSubComments", fields: [parentCommentId], references: [id], onDelete: Cascade)
   parentCommentId String?  @map("parent_comment_id")
-  post            Post     @relation(fields: [postId], references: [id])
+  post            Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId          String   @map("post_id")
-  user            User     @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId          String   @map("user_id")
 
   attachments  Attachment[]
   commentLikes CommentLike[]
   subComments  Comment[]     @relation("CommentSubComments")
 
-  @@unique([parentCommentId, postId, userId])
   @@map("comments")
 }
 
@@ -80,12 +79,11 @@ model CommentLike {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  comment   Comment @relation(fields: [commentId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
   commentId String  @map("comment_id")
-  user      User    @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String  @map("user_id")
 
-  @@unique([commentId, userId])
   @@map("comment_likes")
 }
 
@@ -103,14 +101,13 @@ model Post {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  user   User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @map("user_id")
 
   attachments Attachment[]
   comments    Comment[]
   postLikes   PostLike[]
 
-  @@unique([userId])
   @@map("posts")
 }
 
@@ -120,12 +117,11 @@ model PostLike {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  post   Post   @relation(fields: [postId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId String @map("post_id")
-  user   User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @map("user_id")
 
-  @@unique([postId, userId])
   @@map("post_likes")
 }
 
