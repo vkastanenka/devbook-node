@@ -1,9 +1,13 @@
+// types
+import { HttpStatusCode } from "../../types/http-status-code"
+
 export class AppError extends Error {
   errors?: { [key: string]: string }
   isOperationalError: boolean
   message: string
   status: 'fail' | 'error'
-  statusCode: number
+  statusCode: HttpStatusCode
+  success: false
 
   constructor({
     errors,
@@ -15,13 +19,14 @@ export class AppError extends Error {
     statusCode: number
   }) {
     super(message)
-    
+
     this.errors = errors
     this.isOperationalError = true
     this.message = message
     this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error'
     this.statusCode = statusCode
-    
+    this.success = false
+
     Error.captureStackTrace(this, this.constructor)
   }
 }

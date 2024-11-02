@@ -6,43 +6,37 @@ import { Prisma } from '@prisma/client'
 import { Request, Response, NextFunction } from 'express'
 import { ZodError } from 'zod'
 
+// constants
+import { HttpStatusCode } from '../../types/http-status-code'
+
 const handlePrismaError = (
   err: any,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  // console.log(err) => TODO: Try different errors and handle them based on code
+  console.log(err.code) // TODO: Examine and see if any unique ones pop up
   switch (err.code) {
-    // handling duplicate key errors
     case 'P2002':
       return new AppError({
-        message: 'Duplicate field value',
-        statusCode: 400,
+        message: `Unique constraint failed for: ${err.meta.target}`,
+        statusCode: HttpStatusCode.BAD_REQUEST,
         errors: { [`${err.meta.target}`]: 'Duplicate field value' },
       })
 
-    // handling invalid id errors
-    case 'P2014':
+    // "An operation failed because it depends on one or more records that were required but not found. {cause}"
+    case 'P2025':
       return new AppError({
-        message: 'Invalid ID',
-        statusCode: 400,
-        errors: { [`${err.meta.target}`]: 'Invalid ID' },
-      })
-
-    // handling invalid data errors
-    case 'P2003':
-      return new AppError({
-        message: 'Invalid input data',
-        statusCode: 400,
-        errors: { [`${err.meta.target}`]: 'Invalid input data' },
+        message: 'Record(s) not found',
+        statusCode: HttpStatusCode.NOT_FOUND,
+        errors: { [err.meta.modelName]: err.meta.cause },
       })
 
     // handling all other errors
     default:
       return new AppError({
-        message: `Something went wrong with ${err.meta.modelName}: ${err.meta.cause}`,
-        statusCode: 500,
+        message: `Something went wrong with model ${err.meta.modelName}: ${err.meta.cause}`,
+        statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
         errors: { [err.meta.modelName]: err.meta.cause },
       })
   }
@@ -61,8 +55,8 @@ const handleZodError = (
   })
 
   return new AppError({
-    message: `Validation error`,
-    statusCode: 400,
+    message: `Input validation error`,
+    statusCode: HttpStatusCode.BAD_REQUEST,
     errors,
   })
 }
@@ -71,12 +65,11 @@ const sendErrorDev = (err: any, req: Request, res: Response) => {
   // API
   if (req.originalUrl.startsWith('/api')) {
     return res.status(err.statusCode).json({
-      error: err,
       errors: err.errors,
       message: err.message,
-      success: false,
-      stack: err.stack,
       status: err.status,
+      statusCode: err.statusCode,
+      success: err.success,
     })
   }
 
@@ -104,7 +97,7 @@ const sendErrorProd = (err: any, req: Request, res: Response) => {
     // Responding to programming or other unknown errors: Don't leak details
     console.error('ERROR 💥', err)
 
-    return res.status(500).json({
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       status: 'error',
       message: 'Something went very wrong!',
     })
@@ -130,31 +123,36 @@ const sendErrorProd = (err: any, req: Request, res: Response) => {
   })
 }
 
+/**
+ * TODO
+ *
+ * Confirm implementation with original
+ */
+
 export const globalErrorHandler = (
   err: any,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  err.statusCode = err.statusCode || 500
   err.status = err.status || 'error'
+  err.statusCode = err.statusCode || 500
+
+  // Prisma error handling
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    console.log('Prisma error!')
+    err = handlePrismaError(err, req, res, next)
+  }
+
+  // Zod error handling
+  if (err instanceof ZodError) {
+    console.log('Zod error!')
+    err = handleZodError(err, req, res, next)
+  }
 
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, req, res)
   } else if (process.env.NODE_ENV === 'production') {
-    let error = { ...err }
-    error.message = err.message
-
-    // Prisma error handling
-    if (err instanceof Prisma.PrismaClientKnownRequestError) {
-      error = handlePrismaError(err, req, res, next)
-    }
-
-    // Zod error handling
-    if (err instanceof ZodError) {
-      error = handleZodError(err, req, res, next)
-    }
-
-    sendErrorProd(error, req, res)
+    sendErrorProd(err, req, res)
   }
 }

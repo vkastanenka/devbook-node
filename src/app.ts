@@ -8,12 +8,16 @@ import hpp from 'hpp'
 import morgan from 'morgan'
 import rateLimit from 'express-rate-limit'
 
-import { AppError } from './error-handling/app-error'
-import { globalErrorHandler } from './error-handling/global-error-handler'
+import { AppError } from './lib/error/app-error'
+import { globalErrorHandler } from './lib/error/global-error-handler'
 
 // routes
 import { authRouter } from './routes/auth-routes'
+import { searchRouter } from './routes/search-routes'
 import { userRouter } from './routes/user-routes'
+
+// types
+import { HttpStatusCode } from './types/http-status-code'
 
 // Set up env variables
 dotenv.config()
@@ -69,6 +73,7 @@ app.use((req, res, next) => {
 
 // Apply routes
 app.use('/api/v1/auth', authRouter)
+app.use('/api/v1/search', searchRouter)
 app.use('/api/v1/users', userRouter)
 
 // Handling unknown routes
@@ -76,7 +81,7 @@ app.all('*', (req, res, next) => {
   next(
     new AppError({
       message: `Can't find ${req.originalUrl} on this server!`,
-      statusCode: 404,
+      statusCode: HttpStatusCode.NOT_FOUND,
     })
   )
 })

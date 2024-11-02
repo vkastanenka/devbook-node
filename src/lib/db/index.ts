@@ -1,6 +1,12 @@
 // utils
-import { hashPassword } from './utils'
+import { hashPassword } from '../auth/hash-password'
 import { PrismaClient } from '@prisma/client'
+
+/**
+ * TODO
+ * 
+ * Properly set this up
+ */
 
 const prismaClientSingleton = () => {
   return new PrismaClient().$extends({

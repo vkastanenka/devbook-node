@@ -1,6 +1,10 @@
 // utils
-import { catchAsync } from './catch-async'
-import { responseService } from './response-service'
+import { AppError } from '../error/app-error'
+import { AppResponse } from './app-response'
+import { catchAsync } from '../error/catch-async'
+
+// types
+import { HttpStatusCode } from '../../types/http-status-code'
 
 const createRecord = (Model: any) =>
   catchAsync(async (req, res, next) => {
@@ -8,12 +12,13 @@ const createRecord = (Model: any) =>
     const record = await Model.create({ data: req.body })
 
     // Respond
-    res.status(responseService.statusCodes.created).json(
-      responseService.created({
-        message: 'Successfully created record!',
-        data: record,
-      })
-    )
+    new AppResponse({
+      data: record,
+      message: 'Record created!',
+      res,
+      statusCode: HttpStatusCode.CREATED,
+    }).respond()
+    return
   })
 
 const readRecord = (Model: any) =>
@@ -21,26 +26,26 @@ const readRecord = (Model: any) =>
     // Find the record by id
     const record = await Model.findUnique({
       where: {
-        id: req.params.id,
+        id: req.body.id,
       },
     })
 
     // If no record, respond with an error
     if (!record) {
-      return res.status(responseService.statusCodes.notFound).json(
-        responseService.notFound({
-          message: 'No record found with provided id!',
-        })
-      )
+      throw new AppError({
+        message: 'Record not found!',
+        statusCode: HttpStatusCode.NOT_FOUND,
+      })
     }
 
     // Respond
-    res.status(responseService.statusCodes.ok).json(
-      responseService.ok({
-        message: 'Successfully found record!',
-        data: record,
-      })
-    )
+    new AppResponse({
+      data: record,
+      message: 'Record found!',
+      res,
+      statusCode: HttpStatusCode.OK,
+    }).respond()
+    return
   })
 
 const readAllRecords = (Model: any) =>
@@ -49,12 +54,13 @@ const readAllRecords = (Model: any) =>
     const records = await Model.findMany()
 
     // Respond
-    res.status(responseService.statusCodes.ok).json(
-      responseService.ok({
-        message: 'Successfully found all records!',
-        data: records,
-      })
-    )
+    new AppResponse({
+      data: records,
+      message: 'All records found!',
+      res,
+      statusCode: HttpStatusCode.OK,
+    }).respond()
+    return
   })
 
 const updateRecord = (Model: any) =>
@@ -68,12 +74,13 @@ const updateRecord = (Model: any) =>
     })
 
     // Respond
-    res.status(responseService.statusCodes.ok).json(
-      responseService.ok({
-        message: 'Successfully updated record!',
-        data: updatedRecord,
-      })
-    )
+    new AppResponse({
+      data: updatedRecord,
+      message: 'Updated record!',
+      res,
+      statusCode: HttpStatusCode.OK,
+    }).respond()
+    return
   })
 
 const deleteRecord = (Model: any) =>
@@ -86,11 +93,11 @@ const deleteRecord = (Model: any) =>
     })
 
     // Respond
-    res
-      .status(responseService.statusCodes.noContent)
-      .json(
-        responseService.noContent({ message: 'Successfully deleted record!' })
-      )
+    new AppResponse({
+      message: 'Deleted record!',
+      res,
+      statusCode: HttpStatusCode.OK,
+    }).respond()
     return
   })
 

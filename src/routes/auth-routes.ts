@@ -4,6 +4,12 @@ import express from 'express'
 // controllers
 import { authController } from '../controllers/auth-controller'
 
+// utils
+import { restrict } from '../lib/auth/restrict'
+
+// types
+import { UserRole } from '@prisma/client'
+
 // Set up router
 const router = express.Router()
 
@@ -11,33 +17,41 @@ const router = express.Router()
 // Public Routes
 
 // @route   GET api/v1/auth/test
-// @desc    Tests auths route
+// @desc    Tests auth route
 // @access  Public
-router.get('/test', authController.test)
-
-// @route   POST api/v1/auth/register
-// @desc    Register user
-// @access  Public
-router.post('/register', authController.register)
+router.get('/test', authController.authTest)
 
 // @route   POST api/v1/auth/login
 // @desc    Login User / JWT Response
 // @access  Public
-router.post('/login', authController.login)
+router.post('/login', authController.authLogin)
+
+// @route   POST api/v1/auth/register
+// @desc    Register user
+// @access  Public
+router.post('/register', authController.authRegister)
 
 // @route   POST api/v1/auth/send-reset-password-token
 // @desc    Send email with a reset password token
 // @access  Public
-router.post('/send-reset-password-token', authController.sendResetPasswordToken)
+router.post(
+  '/send-reset-password-token',
+  authController.authSendResetPasswordToken
+)
 
 // @route   PATCH api/v1/auth/reset-password/:token
 // @desc    Resets user password with token
 // @access  Public
-router.patch('/reset-password/:token', authController.resetPassword)
+router.patch('/reset-password/:token', authController.authResetPassword)
+
+////////////////////
+// Restricted Routes
+
+router.use(restrict([UserRole.ADMIN]))
 
 // @route   DELETE api/v1/auth/session/:id
 // @desc    Deletes session matching id
 // @access  Public
-router.delete('/session/:id', authController.deleteSession)
+router.delete('/session/:id', authController.authDeleteSession)
 
 export const authRouter = router

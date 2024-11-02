@@ -1,126 +1,97 @@
-// controllers
-import { catchAsync } from '../lib/catch-async'
-import { controllerFactory } from '../lib/controller-factory'
-
 // utils
 import prisma from '../lib/db'
-import { responseService } from '../lib/response-service'
+
+import { AppError } from '../lib/error/app-error'
+import { AppResponse } from '../lib/utils/app-response'
+import { catchAsync } from '../lib/error/catch-async'
+import { controllerFactory } from '../lib/utils/controller-factory'
 
 // types
+import { HttpStatusCode } from '../types/http-status-code'
 import { Request, Response, NextFunction } from 'express'
 
+// validation
+import { userReadUsernameReqBodySchema } from '../validation/user'
+
 // Tests users route
-const test = (req: Request, res: Response, next: NextFunction) => {
+const userTest = (req: Request, res: Response, next: NextFunction) => {
   res.json({ message: 'Users route secured' })
   return
 }
 
-// Get all users
-const getUser = controllerFactory.readRecord(prisma.user)
-
-// Get all users
-const getAllUsers = controllerFactory.readAllRecords(prisma.user)
-
-// Creates user
-const createUser = controllerFactory.createRecord(prisma.user)
-
-// Updates user matching id
-const updateUser = controllerFactory.updateRecord(prisma.user)
-
-// Deletes user matching id
-const deleteUser = controllerFactory.deleteRecord(prisma.user)
-
 // Returns user associated with session JWT
-const getCurrentUser = (req: Request, res: Response, next: NextFunction) => {
+const userGetCurrentUser = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   if (req.user) {
-    res.status(responseService.statusCodes.ok).json(
-      responseService.ok({
-        message: 'Found current user!',
-        data: req.user,
-      })
-    )
-    return
-  } else {
-    res
-      .status(responseService.statusCodes.notFound)
-      .json(responseService.notFound({ message: 'Current user not found!' }))
+    new AppResponse({
+      data: req.user,
+      message: 'Current user found!',
+      res,
+      statusCode: HttpStatusCode.OK,
+    }).respond()
     return
   }
+
+  throw new AppError({
+    message: 'Current user not found!',
+    statusCode: HttpStatusCode.NOT_FOUND,
+  })
 }
 
-// Returns models matching provided query
-const getUserDevbookSearch = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    // TODO: Zod validation
-
-    const users = await prisma.user.findMany({
-      where: {
-        OR: [
-          {
-            name: {
-              contains: req.params.q,
-              mode: 'insensitive',
-            },
-          },
-          {
-            username: {
-              contains: req.params.q,
-              mode: 'insensitive',
-            },
-          },
-        ],
-      },
-    })
-
-    if (!users?.length) {
-      res
-        .status(responseService.statusCodes.notFound)
-        .json(responseService.notFound({ message: 'No results found!' }))
-      return
-    }
-
-    res
-      .status(responseService.statusCodes.ok)
-      .json(responseService.ok({ message: 'Results found!', data: users }))
-    return
-  }
-)
-
 // Gets user with relations
-const getUsername = catchAsync(
-  // TODO: Zod validation
-
+const userReadUsername = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    // Validate body
+    userReadUsernameReqBodySchema.parse(req.body)
+
+    // Find username (figure out nested fields implementation)
     const user = await prisma.user.findUnique({
       where: { username: req.params.username },
-      ...(req.body.include ? { include: req.body.include } : {}),
+      // ...(req.body.include ? { include: req.body.include } : {}),
     })
 
     if (!user) {
-      res
-        .status(responseService.statusCodes.notFound)
-        .json(responseService.notFound({ message: 'No user found!' }))
-      return
+      throw new AppError({
+        message: 'User not found!',
+        statusCode: HttpStatusCode.NOT_FOUND,
+      })
     }
 
-    res.status(responseService.statusCodes.ok).json(
-      responseService.ok({
-        message: 'User found!',
-        data: user,
-      })
-    )
+    new AppResponse({
+      data: user,
+      message: 'User found!',
+      res,
+      statusCode: HttpStatusCode.OK,
+    }).respond()
     return
   }
 )
 
+// Get user
+const userReadUser = controllerFactory.readRecord(prisma.user)
+
+// Get all users
+const userReadAllUsers = controllerFactory.readAllRecords(prisma.user)
+
+// Creates user
+const userCreateUser = controllerFactory.createRecord(prisma.user)
+
+// Updates user matching id
+const userUpdateUser = controllerFactory.updateRecord(prisma.user)
+
+// Deletes user matching id
+const userDeleteUser = controllerFactory.deleteRecord(prisma.user)
+
 export const userController = {
-  test,
-  getUser,
-  getAllUsers,
-  createUser,
-  updateUser,
-  deleteUser,
-  getCurrentUser,
-  getUserDevbookSearch,
-  getUsername,
+  userTest,
+  userCreateUser,
+  userReadUser,
+  userReadAllUsers,
+  userUpdateUser,
+  userDeleteUser,
+  userGetCurrentUser,
+  userReadUsername,
 }
