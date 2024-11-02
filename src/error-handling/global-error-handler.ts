@@ -1,7 +1,6 @@
 // utils
 import { AppError } from './app-error'
 import { Prisma } from '@prisma/client'
-import { responseService } from '../lib/response-service'
 
 // types
 import { Request, Response, NextFunction } from 'express'
@@ -13,7 +12,7 @@ const handlePrismaError = (
   res: Response,
   next: NextFunction
 ) => {
-  // console.log(err)
+  // console.log(err) => TODO: Try different errors and handle them based on code
   switch (err.code) {
     // handling duplicate key errors
     case 'P2002':
