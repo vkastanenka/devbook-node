@@ -4,9 +4,12 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import express from 'express'
 import helmet from 'helmet'
+import hpp from 'hpp'
 import morgan from 'morgan'
 import rateLimit from 'express-rate-limit'
-import hpp from 'hpp'
+
+import { AppError } from './error-handling/app-error'
+import { globalErrorHandler } from './error-handling/global-error-handler'
 
 // routes
 import { authRouter } from './routes/auth-routes'
@@ -67,5 +70,18 @@ app.use((req, res, next) => {
 // Apply routes
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/users', userRouter)
+
+// Handling unknown routes
+app.all('*', (req, res, next) => {
+  next(
+    new AppError({
+      message: `Can't find ${req.originalUrl} on this server!`,
+      statusCode: 404,
+    })
+  )
+})
+
+// Global error handling
+app.use(globalErrorHandler);
 
 export default app
