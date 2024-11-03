@@ -70,19 +70,19 @@ const userReadUsername = catchAsync(
   }
 )
 
-// Get user
+// Read user
 const userReadUser = controllerFactory.readRecord(prisma.user)
 
-// Get all users
+// Read all users
 const userReadAllUsers = controllerFactory.readAllRecords(prisma.user)
 
-// Creates user
+// Create user
 const userCreateUser = controllerFactory.createRecord(prisma.user)
 
-// Updates user matching id
+// Update user
 const userUpdateUser = controllerFactory.updateRecord(prisma.user)
 
-// Deletes user matching id
+// Delete user
 const userDeleteUser = controllerFactory.deleteRecord(prisma.user)
 
 export const userController = {
