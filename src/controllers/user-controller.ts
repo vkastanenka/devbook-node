@@ -25,9 +25,9 @@ const userGetCurrentUser = (
   res: Response,
   next: NextFunction
 ) => {
-  if (req.user) {
+  if (req.currentUser) {
     new AppResponse({
-      data: req.user,
+      data: req.currentUser,
       message: 'Current user found!',
       res,
       statusCode: HttpStatusCode.OK,

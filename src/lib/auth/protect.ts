@@ -90,7 +90,7 @@ export const protect = catchAsync(
     }
 
     // Assign currentUser to req.user to be used in protected route functions
-    req.user = currentUser
+    req.currentUser = currentUser
 
     next()
   }

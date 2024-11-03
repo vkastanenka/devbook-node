@@ -2,17 +2,19 @@
 import { hashPassword } from '../auth/hash-password'
 import { PrismaClient } from '@prisma/client'
 
-/**
- * TODO
- * 
- * Properly set this up
- */
-
 const prismaClientSingleton = () => {
-  return new PrismaClient().$extends({
-    query: {
+  return new PrismaClient({
+    omit: {
       user: {
-        // TODO: Find out how to query user without password
+        password: true,
+      },
+    },
+  }).$extends({
+    // query
+    query: {
+      // user
+      user: {
+        // create
         async create({ model, operation, args, query }) {
           const hashedPassword = await hashPassword(
             args.data.password as string
@@ -20,6 +22,8 @@ const prismaClientSingleton = () => {
           args.data.password = hashedPassword
           return query(args)
         },
+
+        // update
         async update({ model, operation, args, query }) {
           if (args.data.password) {
             const hashedPassword = await hashPassword(

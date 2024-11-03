@@ -26,7 +26,7 @@ const readRecord = (Model: any) =>
     // Find the record by id
     const record = await Model.findUnique({
       where: {
-        id: req.body.id,
+        id: req.params.id,
       },
     })
 
@@ -70,7 +70,7 @@ const updateRecord = (Model: any) =>
       where: {
         id: req.params.id,
       },
-      data: { ...req.body, updatedAt: new Date() },
+      data: req.body,
     })
 
     // Respond
