@@ -14,10 +14,12 @@ const prismaClientSingleton = () => {
       user: {
         // create
         async create({ model, operation, args, query }) {
-          const hashedPassword = await hashPassword(
-            args.data.password as string
-          )
-          args.data.password = hashedPassword
+          if (args.data.password) {
+            const hashedPassword = await hashPassword(
+              args.data.password as string
+            )
+            args.data.password = hashedPassword
+          }
           return query(args)
         },
 

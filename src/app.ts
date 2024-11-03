@@ -14,6 +14,7 @@ import { globalErrorHandler } from './lib/error/global-error-handler'
 // routes
 import { authRouter } from './routes/auth-routes'
 import { searchRouter } from './routes/search-routes'
+import { postRouter } from './routes/post-routes'
 import { userRouter } from './routes/user-routes'
 
 // types
@@ -74,6 +75,7 @@ app.use((req, res, next) => {
 // Apply routes
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/search', searchRouter)
+app.use('/api/v1/posts', postRouter)
 app.use('/api/v1/users', userRouter)
 
 // Handling unknown routes

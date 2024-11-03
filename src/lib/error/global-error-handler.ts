@@ -9,38 +9,70 @@ import { ZodError } from 'zod'
 // constants
 import { HttpStatusCode } from '../../types/http-status-code'
 
-// Prisma error handler
-const handlePrismaError = (
+// Prisma client known request error handler
+const handlePrismaClientKnownRequestError = (
   err: any,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
+  console.log(err.code)
   switch (err.code) {
     // "Unique constraint failed on the {constraint}"
     case 'P2002':
       return new AppError({
+        errors: { [`${err.meta.target}`]: 'Duplicate field value' },
         message: `Unique constraint failed for: ${err.meta.target}`,
         statusCode: HttpStatusCode.BAD_REQUEST,
-        errors: { [`${err.meta.target}`]: 'Duplicate field value' },
+      })
+
+    // "Null constraint violation on the {constraint}"
+    case 'P2011':
+      const errors: { [key: string | number]: string } = {}
+
+      err.meta.constraint.forEach((field: string) => {
+        errors[field] = `${field} is required`
+      })
+
+      return new AppError({
+        errors,
+        message: 'Missing input(s)',
+        statusCode: HttpStatusCode.BAD_REQUEST,
       })
 
     // "An operation failed because it depends on one or more records that were required but not found. {cause}"
     case 'P2025':
       return new AppError({
+        errors: { [err.meta.modelName]: err.meta.cause },
         message: 'Record(s) not found',
         statusCode: HttpStatusCode.NOT_FOUND,
-        errors: { [err.meta.modelName]: err.meta.cause },
       })
 
     // handling all other errors
     default:
       return new AppError({
+        errors: { [err.meta.modelName]: err.meta.cause },
         message: `Something went wrong with model ${err.meta.modelName}: ${err.meta.cause}`,
         statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
-        errors: { [err.meta.modelName]: err.meta.cause },
       })
   }
+}
+
+// Prisma client validation error handler
+const handlePrismaClientValidationError = (
+  err: any,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const splitMessage = err.message.split('\n')
+  const test = splitMessage[splitMessage.length - 1]
+
+  return new AppError({
+    errors: { [err.name]: test },
+    message: `Prisma client validation error: ${test}`,
+    statusCode: HttpStatusCode.BAD_REQUEST,
+  })
 }
 
 // Zod error handler
@@ -138,8 +170,14 @@ export const globalErrorHandler = (
 
   // Prisma error handling
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    console.log('Prisma error!')
-    err = handlePrismaError(err, req, res, next)
+    console.log('Prisma client known request error!')
+    err = handlePrismaClientKnownRequestError(err, req, res, next)
+  }
+
+  // Prisma error handling
+  if (err instanceof Prisma.PrismaClientValidationError) {
+    console.log('Prisma client validation error!')
+    err = handlePrismaClientValidationError(err, req, res, next)
   }
 
   // Zod error handling

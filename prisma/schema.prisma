@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["omitApi"]
 }
 
@@ -62,9 +62,9 @@ model Comment {
 
   parentComment   Comment? @relation("CommentSubComments", fields: [parentCommentId], references: [id], onDelete: Cascade)
   parentCommentId String?  @map("parent_comment_id")
-  post            Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post            Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId          String   @map("post_id")
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId          String   @map("user_id")
 
   attachments  Attachment[]
@@ -80,10 +80,10 @@ model CommentLike {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  commentId String  @map("comment_id")
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String  @map("user_id")
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  commentId String   @map("comment_id")
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @map("user_id")
 
   @@map("comment_likes")
 }
@@ -102,7 +102,7 @@ model Post {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @map("user_id")
 
   attachments Attachment[]
@@ -118,9 +118,9 @@ model PostLike {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post   Post?  @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId String @map("post_id")
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @map("user_id")
 
   @@map("post_likes")
@@ -133,7 +133,7 @@ model Session {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @map("user_id")
 
   @@unique([userId])
