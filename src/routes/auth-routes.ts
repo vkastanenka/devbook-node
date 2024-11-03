@@ -51,7 +51,7 @@ router.use(restrict([UserRole.ADMIN]))
 
 // @route   DELETE api/v1/auth/session/:id
 // @desc    Deletes session matching id
-// @access  Public
+// @access  Restricted
 router.delete('/session/:id', authController.authDeleteSession)
 
 export const authRouter = router

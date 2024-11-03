@@ -25,9 +25,9 @@ const postBodySchema = z
 export const postCreateCurrentUserCommentReqBodySchema = z
   .object({
     body: commentBodySchema,
-    parentCommentId: z.string().uuid().optional(),
-    postId: z.string().uuid(),
-    userId: z.string().uuid(),
+    parentCommentId: z.string().optional(),
+    postId: z.string(),
+    userId: z.string(),
   })
   .strict()
 
@@ -39,15 +39,15 @@ export const postUpdateCurrentUserCommentReqBodySchema = z
 
 export const postCreateCurrentUserCommentLikeReqBodySchema = z
   .object({
-    commentId: z.string().uuid(),
-    userId: z.string().uuid(),
+    commentId: z.string(),
+    userId: z.string(),
   })
   .strict()
 
 export const postCreateCurrentUserPostReqBodySchema = z
   .object({
     body: postBodySchema,
-    userId: z.string().uuid(),
+    userId: z.string(),
   })
   .strict()
 
@@ -59,7 +59,7 @@ export const postUpdateCurrentUserPostReqBodySchema = z
 
 export const postCreateCurrentUserPostLikeReqBodySchema = z
   .object({
-    postId: z.string().uuid(),
-    userId: z.string().uuid(),
+    postId: z.string(),
+    userId: z.string(),
   })
   .strict()

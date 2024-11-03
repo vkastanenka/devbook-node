@@ -44,27 +44,27 @@ router.use(restrict([UserRole.ADMIN]))
 
 // @route   GET api/v1/users/user/:id
 // @desc    Returns user matching id parameter
-// @access  Public
+// @access  Restricted
 router.get('/user/:id', userController.userReadUser)
 
 // @route   GET api/v1/users/users
 // @desc    Get all users
-// @access  Public
+// @access  Restricted
 router.get('/users', userController.userReadAllUsers)
 
 // @route   POST api/v1/users/user
 // @desc    Creates user
-// @access  Public
+// @access  Restricted
 router.post('/user', userController.userCreateUser)
 
 // @route   PATCH api/v1/users/user/:id
 // @desc    Updates user matching id
-// @access  Public
+// @access  Restricted
 router.patch('/user/:id', userController.userUpdateUser)
 
 // @route   DELETE api/v1/users/user/:id
 // @desc    Deletes user matching id
-// @access  Public
+// @access  Restricted
 router.delete('/user/:id', userController.userDeleteUser)
 
 export const userRouter = router
