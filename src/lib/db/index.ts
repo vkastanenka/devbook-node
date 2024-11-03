@@ -10,9 +10,7 @@ const prismaClientSingleton = () => {
       },
     },
   }).$extends({
-    // query
     query: {
-      // user
       user: {
         // create
         async create({ model, operation, args, query }) {

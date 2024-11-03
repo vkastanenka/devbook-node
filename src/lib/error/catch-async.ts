@@ -1,6 +1,7 @@
 // types
 import { Request, Response, NextFunction } from 'express'
 
+// Async error handler wrapper
 export const catchAsync = (
   fn: (
     req: Request,

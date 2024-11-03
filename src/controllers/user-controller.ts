@@ -45,12 +45,11 @@ const userGetCurrentUser = (
 const userReadUsername = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // Validate body
-    userReadUsernameReqBodySchema.parse(req.body)
+    userReadUsernameReqBodySchema.parse({ username: req.params.username })
 
-    // Find username (figure out nested fields implementation)
+    // Find username
     const user = await prisma.user.findUnique({
       where: { username: req.params.username },
-      // ...(req.body.include ? { include: req.body.include } : {}),
     })
 
     if (!user) {
@@ -60,6 +59,7 @@ const userReadUsername = catchAsync(
       })
     }
 
+    // Respond
     new AppResponse({
       data: user,
       message: 'User found!',

@@ -3,6 +3,12 @@ import nodemailer from 'nodemailer'
 
 import { convert } from 'html-to-text'
 
+/**
+ * TODO
+ * 
+ * Update implementation in prod
+ */
+
 const createTransport = () => {
   if (process.env.NODE_ENV === 'production') {
     // Sendgrid in prod

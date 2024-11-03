@@ -169,7 +169,7 @@ const authSendResetPasswordToken = catchAsync(
     const errors: { [key: string]: string } = {}
 
     // Validate body
-    authResetPasswordReqBodySchema.parse(req.body)
+    authSendResetPasswordTokenReqBodySchema.parse(req.body)
 
     // Find user
     const user = await prisma.user.findUnique({
@@ -243,7 +243,7 @@ const authSendResetPasswordToken = catchAsync(
 // Resets user password with token
 const authResetPassword = catchAsync(async (req, res, next) => {
   // Validate body
-  authSendResetPasswordTokenReqBodySchema.parse(req.body)
+  authResetPasswordReqBodySchema.parse(req.body)
 
   // Find user
   const user = await prisma.user.findFirst({
@@ -284,7 +284,7 @@ const authResetPassword = catchAsync(async (req, res, next) => {
 
   // Respond
   new AppResponse({
-    message: 'Password successfully reset!',
+    message: 'Password reset!',
     res,
     statusCode: HttpStatusCode.OK,
   }).respond()

@@ -35,7 +35,7 @@ router.get('/current-user', userController.userGetCurrentUser)
 // @route   POST api/v1/users/username/:username
 // @desc    Gets user with relations
 // @access  Protected
-router.post('/username/:username', userController.userReadUsername)
+router.get('/username/:username', userController.userReadUsername)
 
 ////////////////////
 // Restricted Routes

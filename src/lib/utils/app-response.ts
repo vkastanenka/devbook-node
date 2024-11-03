@@ -2,6 +2,7 @@
 import { HttpStatusCode } from '../../types/http-status-code'
 import { Response } from 'express'
 
+// AppResponse object for providing meaningful responses
 export class AppResponse {
   data?: any
   message: string

@@ -9,14 +9,15 @@ import { ZodError } from 'zod'
 // constants
 import { HttpStatusCode } from '../../types/http-status-code'
 
+// Prisma error handler
 const handlePrismaError = (
   err: any,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  console.log(err.code) // TODO: Examine and see if any unique ones pop up
   switch (err.code) {
+    // "Unique constraint failed on the {constraint}"
     case 'P2002':
       return new AppError({
         message: `Unique constraint failed for: ${err.meta.target}`,
@@ -42,6 +43,7 @@ const handlePrismaError = (
   }
 }
 
+// Zod error handler
 const handleZodError = (
   err: any,
   req: Request,
@@ -61,6 +63,7 @@ const handleZodError = (
   })
 }
 
+// Send error messages in dev env
 const sendErrorDev = (err: any, req: Request, res: Response) => {
   // API
   if (req.originalUrl.startsWith('/api')) {
@@ -82,6 +85,7 @@ const sendErrorDev = (err: any, req: Request, res: Response) => {
   })
 }
 
+// Send error messages in prod env
 const sendErrorProd = (err: any, req: Request, res: Response) => {
   // API
 
@@ -122,12 +126,6 @@ const sendErrorProd = (err: any, req: Request, res: Response) => {
     msg: 'Please try again later...',
   })
 }
-
-/**
- * TODO
- *
- * Confirm implementation with original
- */
 
 export const globalErrorHandler = (
   err: any,

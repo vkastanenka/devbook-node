@@ -15,9 +15,9 @@ const router = express.Router()
 
 router.use(protect)
 
-// @route   GET api/v1/search/search-devbook
+// @route   GET api/v1/search/devbook
 // @desc    Returns users whose name or username includes the body query
 // @access  Protected
-router.get('/search/search-devbook', searchController.searchDevbook)
+router.get('/devbook', searchController.searchDevbook)
 
 export const searchRouter = router

@@ -5,6 +5,7 @@ import { AppError } from '../error/app-error'
 import { HttpStatusCode } from '../../types/http-status-code'
 import { Request, Response, NextFunction } from 'express'
 
+// Restricts paths based on provided role
 export const restrict = (roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     // If the user's role is not included in the argument, deny access

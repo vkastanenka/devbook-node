@@ -6,6 +6,7 @@ import { catchAsync } from '../error/catch-async'
 // types
 import { HttpStatusCode } from '../../types/http-status-code'
 
+// Create a single record
 const createRecord = (Model: any) =>
   catchAsync(async (req, res, next) => {
     // Create a new record
@@ -21,6 +22,7 @@ const createRecord = (Model: any) =>
     return
   })
 
+// Read a single record
 const readRecord = (Model: any) =>
   catchAsync(async (req, res, next) => {
     // Find the record by id
@@ -48,6 +50,7 @@ const readRecord = (Model: any) =>
     return
   })
 
+// Read all records: TODO - query params for more control?
 const readAllRecords = (Model: any) =>
   catchAsync(async (req, res, next) => {
     // Find all records
@@ -63,6 +66,7 @@ const readAllRecords = (Model: any) =>
     return
   })
 
+// Update a single record
 const updateRecord = (Model: any) =>
   catchAsync(async (req, res, next) => {
     // Update record
@@ -83,6 +87,7 @@ const updateRecord = (Model: any) =>
     return
   })
 
+// Delete a single record
 const deleteRecord = (Model: any) =>
   catchAsync(async (req, res, next) => {
     // Delete record
