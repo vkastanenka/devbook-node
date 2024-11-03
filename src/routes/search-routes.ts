@@ -10,6 +10,14 @@ import { protect } from '../lib/auth/protect'
 // Set up router
 const router = express.Router()
 
+/////////////////
+// Public Routes
+
+// @route   GET api/v1/search/test
+// @desc    Tests search route
+// @access  Public
+router.get('/test', searchController.searchTest)
+
 ///////////////////
 // Protected Routes
 

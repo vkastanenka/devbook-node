@@ -12,6 +12,13 @@ import { Request, Response, NextFunction } from 'express'
 // validation
 import { searchDevbookReqBodySchema } from '../validation/search'
 
+// Tests search route
+const searchTest = (req: Request, res: Response, next: NextFunction) => {
+  res.json({ message: 'Search route secured' })
+  return
+}
+
+
 // Returns models matching provided query
 const searchDevbook = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -57,5 +64,6 @@ const searchDevbook = catchAsync(
 )
 
 export const searchController = {
+  searchTest,
   searchDevbook,
 }
