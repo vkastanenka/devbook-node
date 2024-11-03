@@ -27,34 +27,189 @@ router.get('/test', postController.postTest)
 
 router.use(protect)
 
+// @route   POST api/v1/posts/current-user/comment
+// @desc    Creates current user comment
+// @access  Protected
+router.post(
+  '/current-user/comment',
+  postController.postCreateCurrentUserComment
+)
+
+// @route   PATCH api/v1/posts/current-user/comment/:id
+// @desc    Updates current user comment
+// @access  Protected
+router.patch(
+  '/current-user/comment/:id',
+  postController.postUpdateCurrentUserComment
+)
+
+// @route   DELETE api/v1/posts/current-user/comment/:id
+// @desc    Deletes current user comment
+// @access  Protected
+router.delete(
+  '/current-user/comment/:id',
+  postController.postDeleteCurrentUserComment
+)
+
+// @route   POST api/v1/posts/current-user/comment-like
+// @desc    Creates current user comment like
+// @access  Protected
+router.post(
+  '/current-user/comment-like',
+  postController.postCreateCurrentUserCommentLike
+)
+
+// @route   DELETE api/v1/posts/current-user/comment-like/:id
+// @desc    Deletes current user comment like
+// @access  Protected
+router.delete(
+  '/current-user/comment-like/:id',
+  postController.postDeleteCurrentUserCommentLike
+)
+
+// @route   POST api/v1/posts/current-user/post
+// @desc    Creates current user post
+// @access  Protected
+router.post(
+  '/current-user/post',
+  postController.postCreateCurrentUserPost
+)
+
+// @route   PATCH api/v1/posts/current-user/post/:id
+// @desc    Updates current user post
+// @access  Protected
+router.patch(
+  '/current-user/post/:id',
+  postController.postUpdateCurrentUserPost
+)
+
+// @route   DELETE api/v1/posts/current-user/post/:id
+// @desc    Deletes current user post
+// @access  Protected
+router.delete(
+  '/current-user/post/:id',
+  postController.postDeleteCurrentUserPost
+)
+
+// @route   POST api/v1/posts/current-user/post-like
+// @desc    Creates current user post like
+// @access  Protected
+router.post(
+  '/current-user/post-like',
+  postController.postCreateCurrentUserPostLike
+)
+
+// @route   DELETE api/v1/posts/current-user/post-like/:id
+// @desc    Deletes current user post like
+// @access  Protected
+router.delete(
+  '/current-user/post-like/:id',
+  postController.postDeleteCurrentUserPostLike
+)
+
 ////////////////////
 // Restricted Routes
 
 router.use(restrict([UserRole.ADMIN]))
 
+// @route   GET api/v1/posts/comment/:id
+// @desc    Returns comment matching id parameter
+// @access  Restricted
+router.get('/comment/:id', postController.postReadComment)
+
+// @route   GET api/v1/posts/comments
+// @desc    Get all comments
+// @access  Restricted
+router.get('/comments', postController.postReadAllComments)
+
+// @route   POST api/v1/posts/comment
+// @desc    Creates comment
+// @access  Restricted
+router.post('/comment', postController.postCreateComment)
+
+// @route   PATCH api/v1/posts/comment/:id
+// @desc    Updates comment matching id
+// @access  Restricted
+router.patch('/comment/:id', postController.postUpdateComment)
+
+// @route   DELETE api/v1/posts/comment/:id
+// @desc    Deletes comment matching id
+// @access  Restricted
+router.delete('/comment/:id', postController.postDeleteComment)
+
+// @route   GET api/v1/posts/comment-like/:id
+// @desc    Returns comment like matching id parameter
+// @access  Restricted
+router.get('/comment-like/:id', postController.postReadCommentLike)
+
+// @route   GET api/v1/posts/comment-likes
+// @desc    Get all comment likes
+// @access  Restricted
+router.get('/comment-likes', postController.postReadAllCommentLikes)
+
+// @route   POST api/v1/posts/comment-like
+// @desc    Creates comment like
+// @access  Restricted
+router.post('/comment-like', postController.postCreateCommentLike)
+
+// @route   PATCH api/v1/posts/comment-like/:id
+// @desc    Updates comment like matching id
+// @access  Restricted
+router.patch('/comment-like/:id', postController.postUpdateCommentLike)
+
+// @route   DELETE api/v1/posts/comment-like/:id
+// @desc    Deletes comment like matching id
+// @access  Restricted
+router.delete('/comment-like/:id', postController.postDeleteCommentLike)
+
 // @route   GET api/v1/posts/post/:id
 // @desc    Returns post matching id parameter
-// @access  Public
+// @access  Restricted
 router.get('/post/:id', postController.postReadPost)
 
 // @route   GET api/v1/posts/posts
 // @desc    Get all posts
-// @access  Public
+// @access  Restricted
 router.get('/posts', postController.postReadAllPosts)
 
 // @route   POST api/v1/posts/post
 // @desc    Creates post
-// @access  Public
+// @access  Restricted
 router.post('/post', postController.postCreatePost)
 
 // @route   PATCH api/v1/posts/post/:id
 // @desc    Updates post matching id
-// @access  Public
+// @access  Restricted
 router.patch('/post/:id', postController.postUpdatePost)
 
 // @route   DELETE api/v1/posts/post/:id
 // @desc    Deletes post matching id
-// @access  Public
+// @access  Restricted
 router.delete('/post/:id', postController.postDeletePost)
+
+// @route   GET api/v1/posts/post-like/:id
+// @desc    Returns post like matching id parameter
+// @access  Restricted
+router.get('/post-like/:id', postController.postReadPostLike)
+
+// @route   GET api/v1/posts/post-likes
+// @desc    Get all post likes
+// @access  Restricted
+router.get('/post-likes', postController.postReadAllPostLikes)
+
+// @route   POST api/v1/posts/post-like
+// @desc    Creates post like
+// @access  Restricted
+router.post('/post-like', postController.postCreatePostLike)
+
+// @route   PATCH api/v1/posts/post-like/:id
+// @desc    Updates post like matching id
+// @access  Restricted
+router.patch('/post-like/:id', postController.postUpdatePostLike)
+
+// @route   DELETE api/v1/posts/post-like/:id
+// @desc    Deletes post like matching id
+// @access  Restricted
+router.delete('/post-like/:id', postController.postDeletePostLike)
 
 export const postRouter = router
