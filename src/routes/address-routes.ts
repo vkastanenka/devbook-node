@@ -66,6 +66,11 @@ router.patch(
 
 router.use(restrict([UserRole.ADMIN]))
 
+// @route   POST api/v1/addresses/address
+// @desc    Creates address
+// @access  Restricted
+router.post('/address', addressController.addressCreateAddress)
+
 // @route   GET api/v1/addresses/address/:id
 // @desc    Returns address matching id parameter
 // @access  Restricted
@@ -75,11 +80,6 @@ router.get('/address/:id', addressController.addressReadAddress)
 // @desc    Get all addresses
 // @access  Restricted
 router.get('/addresses', addressController.addressReadAllAddresses)
-
-// @route   POST api/v1/addresses/address
-// @desc    Creates address
-// @access  Restricted
-router.post('/address', addressController.addressCreateAddress)
 
 // @route   PATCH api/v1/addresses/address/:id
 // @desc    Updates address matching id

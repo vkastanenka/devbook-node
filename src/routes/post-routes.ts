@@ -150,6 +150,11 @@ router.use(restrict([UserRole.ADMIN]))
 
 // Comment
 
+// @route   POST api/v1/posts/comment
+// @desc    Creates comment
+// @access  Restricted
+router.post('/comment', postController.postCreateComment)
+
 // @route   GET api/v1/posts/comment/:id
 // @desc    Returns comment matching id parameter
 // @access  Restricted
@@ -159,11 +164,6 @@ router.get('/comment/:id', postController.postReadComment)
 // @desc    Get all comments
 // @access  Restricted
 router.get('/comments', postController.postReadAllComments)
-
-// @route   POST api/v1/posts/comment
-// @desc    Creates comment
-// @access  Restricted
-router.post('/comment', postController.postCreateComment)
 
 // @route   PATCH api/v1/posts/comment/:id
 // @desc    Updates comment matching id
@@ -177,6 +177,11 @@ router.delete('/comment/:id', postController.postDeleteComment)
 
 // CommentLike
 
+// @route   POST api/v1/posts/comment-like
+// @desc    Creates comment like
+// @access  Restricted
+router.post('/comment-like', postController.postCreateCommentLike)
+
 // @route   GET api/v1/posts/comment-like/:id
 // @desc    Returns comment like matching id parameter
 // @access  Restricted
@@ -186,11 +191,6 @@ router.get('/comment-like/:id', postController.postReadCommentLike)
 // @desc    Get all comment likes
 // @access  Restricted
 router.get('/comment-likes', postController.postReadAllCommentLikes)
-
-// @route   POST api/v1/posts/comment-like
-// @desc    Creates comment like
-// @access  Restricted
-router.post('/comment-like', postController.postCreateCommentLike)
 
 // @route   PATCH api/v1/posts/comment-like/:id
 // @desc    Updates comment like matching id
@@ -204,6 +204,11 @@ router.delete('/comment-like/:id', postController.postDeleteCommentLike)
 
 // Post
 
+// @route   POST api/v1/posts/post
+// @desc    Creates post
+// @access  Restricted
+router.post('/post', postController.postCreatePost)
+
 // @route   GET api/v1/posts/post/:id
 // @desc    Returns post matching id parameter
 // @access  Restricted
@@ -213,11 +218,6 @@ router.get('/post/:id', postController.postReadPost)
 // @desc    Get all posts
 // @access  Restricted
 router.get('/posts', postController.postReadAllPosts)
-
-// @route   POST api/v1/posts/post
-// @desc    Creates post
-// @access  Restricted
-router.post('/post', postController.postCreatePost)
 
 // @route   PATCH api/v1/posts/post/:id
 // @desc    Updates post matching id
@@ -231,6 +231,11 @@ router.delete('/post/:id', postController.postDeletePost)
 
 // PostLike
 
+// @route   POST api/v1/posts/post-like
+// @desc    Creates post like
+// @access  Restricted
+router.post('/post-like', postController.postCreatePostLike)
+
 // @route   GET api/v1/posts/post-like/:id
 // @desc    Returns post like matching id parameter
 // @access  Restricted
@@ -240,11 +245,6 @@ router.get('/post-like/:id', postController.postReadPostLike)
 // @desc    Get all post likes
 // @access  Restricted
 router.get('/post-likes', postController.postReadAllPostLikes)
-
-// @route   POST api/v1/posts/post-like
-// @desc    Creates post like
-// @access  Restricted
-router.post('/post-like', postController.postCreatePostLike)
 
 // @route   PATCH api/v1/posts/post-like/:id
 // @desc    Updates post like matching id

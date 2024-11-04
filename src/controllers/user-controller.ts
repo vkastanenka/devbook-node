@@ -65,43 +65,43 @@ const userReadUsername = catchAsync(
 )
 
 // User
+const userCreateUser = crudFactory.createRecord(prisma.user)
 const userReadUser = crudFactory.readRecord(prisma.user)
 const userReadAllUsers = crudFactory.readAllRecords(prisma.user)
-const userCreateUser = crudFactory.createRecord(prisma.user)
 const userUpdateUser = crudFactory.updateRecord(prisma.user)
 const userDeleteUser = crudFactory.deleteRecord(prisma.user)
 
 // UserEducation
+const userCreateEducation = crudFactory.createRecord(prisma.userEducation)
 const userReadEducation = crudFactory.readRecord(prisma.userEducation)
 const userReadAllEducations = crudFactory.readAllRecords(prisma.userEducation)
-const userCreateEducation = crudFactory.createRecord(prisma.userEducation)
 const userUpdateEducation = crudFactory.updateRecord(prisma.userEducation)
 const userDeleteEducation = crudFactory.deleteRecord(prisma.userEducation)
 
 // UserExperience
+const userCreateExperience = crudFactory.createRecord(prisma.userExperience)
 const userReadExperience = crudFactory.readRecord(prisma.userExperience)
 const userReadAllExperiences = crudFactory.readAllRecords(prisma.userExperience)
-const userCreateExperience = crudFactory.createRecord(prisma.userExperience)
 const userUpdateExperience = crudFactory.updateRecord(prisma.userExperience)
 const userDeleteExperience = crudFactory.deleteRecord(prisma.userExperience)
 
 export const userController = {
   userTest,
+  userReadCurrentUser,
+  userReadUsername,
   userCreateUser,
   userReadUser,
   userReadAllUsers,
   userUpdateUser,
   userDeleteUser,
-  userReadCurrentUser,
-  userReadUsername,
+  userCreateEducation,
   userReadEducation,
   userReadAllEducations,
-  userCreateEducation,
   userUpdateEducation,
   userDeleteEducation,
+  userCreateExperience,
   userReadExperience,
   userReadAllExperiences,
-  userCreateExperience,
   userUpdateExperience,
   userDeleteExperience,
 }

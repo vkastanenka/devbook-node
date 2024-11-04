@@ -54,7 +54,7 @@ router.get('/username/:username', userController.userReadUsername)
 // @access  Protected
 router.patch(
   '/current-user/user/:id',
-  validateCurrentUserRecordOwnership({ model: prisma.user }),
+  validateCurrentUserRecordOwnership({ idField: 'id', model: prisma.user }),
   validateReqBody({ schema: userValidation.userUpdateUserReqBodySchema }),
   userController.userUpdateUser
 )
@@ -128,6 +128,11 @@ router.use(restrict([UserRole.ADMIN]))
 
 // User
 
+// @route   PATCH api/v1/users/user/:id
+// @desc    Updates user matching id
+// @access  Restricted
+router.patch('/user/:id', userController.userUpdateUser)
+
 // @route   GET api/v1/users/user/:id
 // @desc    Returns user matching id parameter
 // @access  Restricted
@@ -143,17 +148,17 @@ router.get('/users', userController.userReadAllUsers)
 // @access  Restricted
 router.post('/user', userController.userCreateUser)
 
-// @route   PATCH api/v1/users/user/:id
-// @desc    Updates user matching id
-// @access  Restricted
-router.patch('/user/:id', userController.userUpdateUser)
-
 // @route   DELETE api/v1/users/user/:id
 // @desc    Deletes user matching id
 // @access  Restricted
 router.delete('/user/:id', userController.userDeleteUser)
 
 // UserEducation
+
+// @route   POST api/v1/users/education
+// @desc    Creates education
+// @access  Restricted
+router.post('/education', userController.userCreateEducation)
 
 // @route   GET api/v1/users/education/:id
 // @desc    Returns education matching id parameter
@@ -164,11 +169,6 @@ router.get('/education/:id', userController.userReadEducation)
 // @desc    Get all educations
 // @access  Restricted
 router.get('/educations', userController.userReadAllEducations)
-
-// @route   POST api/v1/users/education
-// @desc    Creates education
-// @access  Restricted
-router.post('/education', userController.userCreateEducation)
 
 // @route   PATCH api/v1/users/education/:id
 // @desc    Updates education matching id
@@ -182,6 +182,11 @@ router.delete('/education/:id', userController.userDeleteEducation)
 
 // UserExperience
 
+// @route   POST api/v1/users/experience
+// @desc    Creates experience
+// @access  Restricted
+router.post('/experience', userController.userCreateExperience)
+
 // @route   GET api/v1/users/experience/:id
 // @desc    Returns experience matching id parameter
 // @access  Restricted
@@ -191,11 +196,6 @@ router.get('/experience/:id', userController.userReadExperience)
 // @desc    Get all experiences
 // @access  Restricted
 router.get('/experiences', userController.userReadAllExperiences)
-
-// @route   POST api/v1/users/experience
-// @desc    Creates experience
-// @access  Restricted
-router.post('/experience', userController.userCreateExperience)
 
 // @route   PATCH api/v1/users/experience/:id
 // @desc    Updates experience matching id

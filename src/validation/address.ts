@@ -54,7 +54,7 @@ const addressCountrySchema = z
 
 const addressCreateAddressReqBodySchema = z
   .object({
-    unitNumber: addressUnitNumberSchema,
+    unitNumber: addressUnitNumberSchema.optional(),
     streetNumber: addressStreetNumberSchema,
     streetName: addressStreetNameSchema,
     suburb: addressSuburbSchema,

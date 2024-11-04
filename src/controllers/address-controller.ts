@@ -13,9 +13,9 @@ const addressTest = (req: Request, res: Response, next: NextFunction) => {
 }
 
 // Address
+const addressCreateAddress = crudFactory.createRecord(prisma.address)
 const addressReadAddress = crudFactory.readRecord(prisma.address)
 const addressReadAllAddresses = crudFactory.readAllRecords(prisma.address)
-const addressCreateAddress = crudFactory.createRecord(prisma.address)
 const addressUpdateAddress = crudFactory.updateRecord(prisma.address)
 const addressDeleteAddress = crudFactory.deleteRecord(prisma.address)
 

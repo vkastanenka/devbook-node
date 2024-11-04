@@ -65,7 +65,13 @@ export const validateCurrentUserRecordCreation = (
 }
 
 // Check if a record belongs to current user
-export const validateCurrentUserRecordOwnership = ({ model }: { model: any }) =>
+export const validateCurrentUserRecordOwnership = ({
+  idField = 'userId',
+  model,
+}: {
+  idField?: 'id' | 'userId'
+  model: any
+}) =>
   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     // Find the record by id
     const record = await model.findUnique({
@@ -83,7 +89,7 @@ export const validateCurrentUserRecordOwnership = ({ model }: { model: any }) =>
     }
 
     // If record user id does not match current user id
-    if (req.currentUser?.id !== record.userId) {
+    if (req.currentUser?.id !== record[idField]) {
       throw new AppError({
         message: 'Record ownership not verified!',
         statusCode: HttpStatusCode.UNAUTHORIZED,

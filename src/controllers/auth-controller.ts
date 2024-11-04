@@ -292,21 +292,21 @@ const authResetPassword = catchAsync(async (req, res, next) => {
 })
 
 // Session
-const authReadSession = crudFactory.readRecord(prisma.address)
-const authReadAllSessions = crudFactory.readAllRecords(prisma.address)
-const authCreateSession = crudFactory.createRecord(prisma.address)
-const authUpdateSession = crudFactory.updateRecord(prisma.address)
-const authDeleteSession = crudFactory.deleteRecord(prisma.address)
+const authCreateSession = crudFactory.createRecord(prisma.session)
+const authReadSession = crudFactory.readRecord(prisma.session)
+const authReadAllSessions = crudFactory.readAllRecords(prisma.session)
+const authUpdateSession = crudFactory.updateRecord(prisma.session)
+const authDeleteSession = crudFactory.deleteRecord(prisma.session)
 
 export const authController = {
   authTest,
-  authReadSession,
-  authReadAllSessions,
-  authCreateSession,
-  authUpdateSession,
-  authDeleteSession,
   authRegister,
   authLogin,
   authSendResetPasswordToken,
   authResetPassword,
+  authCreateSession,
+  authReadSession,
+  authReadAllSessions,
+  authUpdateSession,
+  authDeleteSession,
 }

@@ -13,30 +13,30 @@ const postTest = (req: Request, res: Response, next: NextFunction) => {
 }
 
 // Comment
+const postCreateComment = crudFactory.createRecord(prisma.comment)
 const postReadComment = crudFactory.readRecord(prisma.comment)
 const postReadAllComments = crudFactory.readAllRecords(prisma.comment)
-const postCreateComment = crudFactory.createRecord(prisma.comment)
 const postUpdateComment = crudFactory.updateRecord(prisma.comment)
 const postDeleteComment = crudFactory.deleteRecord(prisma.comment)
 
 // CommentLike
+const postCreateCommentLike = crudFactory.createRecord(prisma.commentLike)
 const postReadCommentLike = crudFactory.readRecord(prisma.commentLike)
 const postReadAllCommentLikes = crudFactory.readAllRecords(prisma.commentLike)
-const postCreateCommentLike = crudFactory.createRecord(prisma.commentLike)
 const postUpdateCommentLike = crudFactory.updateRecord(prisma.commentLike)
 const postDeleteCommentLike = crudFactory.deleteRecord(prisma.commentLike)
 
 // Post
+const postCreatePost = crudFactory.createRecord(prisma.post)
 const postReadPost = crudFactory.readRecord(prisma.post)
 const postReadAllPosts = crudFactory.readAllRecords(prisma.post)
-const postCreatePost = crudFactory.createRecord(prisma.post)
 const postUpdatePost = crudFactory.updateRecord(prisma.post)
 const postDeletePost = crudFactory.deleteRecord(prisma.post)
 
 // PostLike
+const postCreatePostLike = crudFactory.createRecord(prisma.postLike)
 const postReadPostLike = crudFactory.readRecord(prisma.postLike)
 const postReadAllPostLikes = crudFactory.readAllRecords(prisma.postLike)
-const postCreatePostLike = crudFactory.createRecord(prisma.postLike)
 const postUpdatePostLike = crudFactory.updateRecord(prisma.postLike)
 const postDeletePostLike = crudFactory.deleteRecord(prisma.postLike)
 
@@ -47,9 +47,9 @@ export const postController = {
   postReadAllComments,
   postUpdateComment,
   postDeleteComment,
+  postCreateCommentLike,
   postReadCommentLike,
   postReadAllCommentLikes,
-  postCreateCommentLike,
   postUpdateCommentLike,
   postDeleteCommentLike,
   postCreatePost,
@@ -57,9 +57,9 @@ export const postController = {
   postReadAllPosts,
   postUpdatePost,
   postDeletePost,
+  postCreatePostLike,
   postReadPostLike,
   postReadAllPostLikes,
-  postCreatePostLike,
   postUpdatePostLike,
   postDeletePostLike,
 }

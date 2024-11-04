@@ -5,10 +5,16 @@ import express from 'express'
 import { authController } from '../controllers/auth-controller'
 
 // utils
+import prisma from '../lib/db'
+
+import { protect } from '../lib/auth/protect'
 import { restrict } from '../lib/auth/restrict'
 
 // types
 import { UserRole } from '@prisma/client'
+
+// validation
+import { validateCurrentUserRecordOwnership } from '../validation'
 
 // Set up router
 const router = express.Router()
@@ -44,10 +50,29 @@ router.post(
 // @access  Public
 router.patch('/reset-password/:token', authController.authResetPassword)
 
+///////////////////
+// Protected Routes
+
+router.use(protect)
+
+// @route   DELETE api/v1/auth/current-user/session/:id
+// @desc    Deletes current user session
+// @access  Protected
+router.delete(
+  '/current-user/session/:id',
+  validateCurrentUserRecordOwnership({ model: prisma.session }),
+  authController.authDeleteSession
+)
+
 ////////////////////
 // Restricted Routes
 
 router.use(restrict([UserRole.ADMIN]))
+
+// @route   POST api/v1/auth/session
+// @desc    Creates session
+// @access  Restricted
+router.post('/session', authController.authCreateSession)
 
 // @route   GET api/v1/auth/session/:id
 // @desc    Returns session matching id parameter
@@ -58,11 +83,6 @@ router.get('/session/:id', authController.authReadSession)
 // @desc    Get all sessions
 // @access  Restricted
 router.get('/sessions', authController.authReadAllSessions)
-
-// @route   POST api/v1/auth/session
-// @desc    Creates session
-// @access  Restricted
-router.post('/session', authController.authCreateSession)
 
 // @route   PATCH api/v1/auth/session/:id
 // @desc    Updates session matching id
