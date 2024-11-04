@@ -7,7 +7,7 @@ import { addMinutes, addDays } from 'date-fns'
 import { AppError } from '../lib/error/app-error'
 import { AppResponse } from '../lib/utils/app-response'
 import { catchAsync } from '../lib/error/catch-async'
-import { controllerFactory } from '../lib/utils/controller-factory'
+import { crudFactory } from '../lib/utils/crud-factory'
 import { createHash, randomBytes } from 'node:crypto'
 import { sendResetPasswordTokenEmail } from '../lib/utils/email'
 
@@ -291,11 +291,19 @@ const authResetPassword = catchAsync(async (req, res, next) => {
   return
 })
 
-// Delete session
-const authDeleteSession = controllerFactory.deleteRecord(prisma.session)
+// Session
+const authReadSession = crudFactory.readRecord(prisma.address)
+const authReadAllSessions = crudFactory.readAllRecords(prisma.address)
+const authCreateSession = crudFactory.createRecord(prisma.address)
+const authUpdateSession = crudFactory.updateRecord(prisma.address)
+const authDeleteSession = crudFactory.deleteRecord(prisma.address)
 
 export const authController = {
   authTest,
+  authReadSession,
+  authReadAllSessions,
+  authCreateSession,
+  authUpdateSession,
   authDeleteSession,
   authRegister,
   authLogin,

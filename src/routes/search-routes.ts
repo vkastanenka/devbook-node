@@ -7,6 +7,10 @@ import { searchController } from '../controllers/search-controller'
 // utils
 import { protect } from '../lib/auth/protect'
 
+// validation
+import { searchValidation } from '../validation/search'
+import { validateReqBody } from '../validation'
+
 // Set up router
 const router = express.Router()
 
@@ -26,6 +30,10 @@ router.use(protect)
 // @route   GET api/v1/search/devbook
 // @desc    Returns users whose name or username includes the body query
 // @access  Protected
-router.get('/devbook', searchController.searchDevbook)
+router.get(
+  '/devbook',
+  validateReqBody({ schema: searchValidation.searchDevbookReqBodySchema }),
+  searchController.searchDevbook
+)
 
 export const searchRouter = router

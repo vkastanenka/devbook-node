@@ -4,14 +4,11 @@ import prisma from '../lib/db'
 import { AppError } from '../lib/error/app-error'
 import { AppResponse } from '../lib/utils/app-response'
 import { catchAsync } from '../lib/error/catch-async'
-import { controllerFactory } from '../lib/utils/controller-factory'
+import { crudFactory } from '../lib/utils/crud-factory'
 
 // types
 import { HttpStatusCode } from '../types/http-status-code'
 import { Request, Response, NextFunction } from 'express'
-
-// validation
-import { userReadUsernameReqBodySchema } from '../validation/user'
 
 // Tests users route
 const userTest = (req: Request, res: Response, next: NextFunction) => {
@@ -20,7 +17,7 @@ const userTest = (req: Request, res: Response, next: NextFunction) => {
 }
 
 // Returns user associated with session JWT
-const userGetCurrentUser = (
+const userReadCurrentUser = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -41,12 +38,9 @@ const userGetCurrentUser = (
   })
 }
 
-// Gets user with relations
+// Get user based on username
 const userReadUsername = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    // Validate body
-    userReadUsernameReqBodySchema.parse({ username: req.params.username })
-
     // Find username
     const user = await prisma.user.findUnique({
       where: { username: req.params.username },
@@ -70,20 +64,26 @@ const userReadUsername = catchAsync(
   }
 )
 
-// Read user
-const userReadUser = controllerFactory.readRecord(prisma.user)
+// User
+const userReadUser = crudFactory.readRecord(prisma.user)
+const userReadAllUsers = crudFactory.readAllRecords(prisma.user)
+const userCreateUser = crudFactory.createRecord(prisma.user)
+const userUpdateUser = crudFactory.updateRecord(prisma.user)
+const userDeleteUser = crudFactory.deleteRecord(prisma.user)
 
-// Read all users
-const userReadAllUsers = controllerFactory.readAllRecords(prisma.user)
+// UserEducation
+const userReadEducation = crudFactory.readRecord(prisma.userEducation)
+const userReadAllEducations = crudFactory.readAllRecords(prisma.userEducation)
+const userCreateEducation = crudFactory.createRecord(prisma.userEducation)
+const userUpdateEducation = crudFactory.updateRecord(prisma.userEducation)
+const userDeleteEducation = crudFactory.deleteRecord(prisma.userEducation)
 
-// Create user
-const userCreateUser = controllerFactory.createRecord(prisma.user)
-
-// Update user
-const userUpdateUser = controllerFactory.updateRecord(prisma.user)
-
-// Delete user
-const userDeleteUser = controllerFactory.deleteRecord(prisma.user)
+// UserExperience
+const userReadExperience = crudFactory.readRecord(prisma.userExperience)
+const userReadAllExperiences = crudFactory.readAllRecords(prisma.userExperience)
+const userCreateExperience = crudFactory.createRecord(prisma.userExperience)
+const userUpdateExperience = crudFactory.updateRecord(prisma.userExperience)
+const userDeleteExperience = crudFactory.deleteRecord(prisma.userExperience)
 
 export const userController = {
   userTest,
@@ -92,6 +92,16 @@ export const userController = {
   userReadAllUsers,
   userUpdateUser,
   userDeleteUser,
-  userGetCurrentUser,
+  userReadCurrentUser,
   userReadUsername,
+  userReadEducation,
+  userReadAllEducations,
+  userCreateEducation,
+  userUpdateEducation,
+  userDeleteEducation,
+  userReadExperience,
+  userReadAllExperiences,
+  userCreateExperience,
+  userUpdateExperience,
+  userDeleteExperience,
 }

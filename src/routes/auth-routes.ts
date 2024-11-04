@@ -49,6 +49,26 @@ router.patch('/reset-password/:token', authController.authResetPassword)
 
 router.use(restrict([UserRole.ADMIN]))
 
+// @route   GET api/v1/auth/session/:id
+// @desc    Returns session matching id parameter
+// @access  Restricted
+router.get('/session/:id', authController.authReadSession)
+
+// @route   GET api/v1/auth/sessions
+// @desc    Get all sessions
+// @access  Restricted
+router.get('/sessions', authController.authReadAllSessions)
+
+// @route   POST api/v1/auth/session
+// @desc    Creates session
+// @access  Restricted
+router.post('/session', authController.authCreateSession)
+
+// @route   PATCH api/v1/auth/session/:id
+// @desc    Updates session matching id
+// @access  Restricted
+router.patch('/session/:id', authController.authUpdateSession)
+
 // @route   DELETE api/v1/auth/session/:id
 // @desc    Deletes session matching id
 // @access  Restricted

@@ -106,7 +106,7 @@ const deleteRecord = (Model: any) =>
     return
   })
 
-export const controllerFactory = {
+export const crudFactory = {
   createRecord,
   readRecord,
   readAllRecords,

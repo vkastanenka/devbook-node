@@ -9,22 +9,15 @@ import { catchAsync } from '../lib/error/catch-async'
 import { HttpStatusCode } from '../types/http-status-code'
 import { Request, Response, NextFunction } from 'express'
 
-// validation
-import { searchDevbookReqBodySchema } from '../validation/search'
-
 // Tests search route
 const searchTest = (req: Request, res: Response, next: NextFunction) => {
   res.json({ message: 'Search route secured' })
   return
 }
 
-
 // Returns models matching provided query
 const searchDevbook = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    // Validate body
-    searchDevbookReqBodySchema.parse(req.body)
-
     // Find users whose name or username contains the query
     const users = await prisma.user.findMany({
       where: {

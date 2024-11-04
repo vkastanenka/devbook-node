@@ -12,6 +12,7 @@ import { AppError } from './lib/error/app-error'
 import { globalErrorHandler } from './lib/error/global-error-handler'
 
 // routes
+import { addressRouter } from './routes/address-routes'
 import { authRouter } from './routes/auth-routes'
 import { searchRouter } from './routes/search-routes'
 import { postRouter } from './routes/post-routes'
@@ -73,6 +74,7 @@ app.use((req, res, next) => {
 })
 
 // Apply routes
+app.use('/api/v1/addresses', addressRouter)
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/search', searchRouter)
 app.use('/api/v1/posts', postRouter)
@@ -89,6 +91,6 @@ app.all('*', (req, res, next) => {
 })
 
 // Global error handling
-app.use(globalErrorHandler);
+app.use(globalErrorHandler)
 
 export default app

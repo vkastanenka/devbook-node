@@ -1,65 +1,87 @@
+// validation
 import { z } from 'zod'
 
 /**
  * Inputs
  */
 
-const commentBodySchema = z
+// Comment
+
+const postCommentBodySchema = z
   .string()
-  .min(10, { message: 'Minimum 10 characters.' })
+  .min(10, { message: '10 character(s) min' })
   .max(1000, {
-    message: 'Maximum 1000 characters.',
+    message: '1000 character(s) max',
   })
+
+// Post
 
 const postBodySchema = z
   .string()
-  .min(10, { message: 'Minimum 10 characters.' })
+  .min(10, { message: '10 character(s) min' })
   .max(1000, {
-    message: 'Maximum 1000 characters.',
+    message: '1000 character(s) max',
   })
 
 /**
  * Request bodies
  */
 
-export const postCreateCurrentUserCommentReqBodySchema = z
+// Comment
+
+const postCreateCommentReqBodySchema = z
   .object({
-    body: commentBodySchema,
-    parentCommentId: z.string().optional(),
+    body: postCommentBodySchema,
+    parentCommentId: z.string().nullable().optional(),
     postId: z.string(),
     userId: z.string(),
   })
   .strict()
 
-export const postUpdateCurrentUserCommentReqBodySchema = z
+const postUpdateCommentReqBodySchema = z
   .object({
-    body: commentBodySchema,
+    body: postCommentBodySchema.optional(),
   })
   .strict()
 
-export const postCreateCurrentUserCommentLikeReqBodySchema = z
+// CommentLike
+
+const postCreateCommentLikeReqBodySchema = z
   .object({
     commentId: z.string(),
     userId: z.string(),
   })
   .strict()
 
-export const postCreateCurrentUserPostReqBodySchema = z
+// Post
+
+const postCreatePostReqBodySchema = z
   .object({
     body: postBodySchema,
     userId: z.string(),
   })
   .strict()
 
-export const postUpdateCurrentUserPostReqBodySchema = z
+const postUpdatePostReqBodySchema = z
   .object({
-    body: postBodySchema,
+    body: postBodySchema.optional(),
   })
   .strict()
 
-export const postCreateCurrentUserPostLikeReqBodySchema = z
+// PostLike
+
+const postCreatePostLikeReqBodySchema = z
   .object({
     postId: z.string(),
     userId: z.string(),
   })
   .strict()
+
+export const postValidation = {
+  postCreateCommentReqBodySchema,
+  postUpdateCommentReqBodySchema,
+  postCreateCommentLikeReqBodySchema,
+  postCreatePostReqBodySchema,
+  postUpdatePostReqBodySchema,
+  postCreatePostLikeReqBodySchema,
+}

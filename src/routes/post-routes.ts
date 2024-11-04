@@ -5,11 +5,21 @@ import express from 'express'
 import { postController } from '../controllers/post-controller'
 
 // utils
+import prisma from '../lib/db'
+
 import { protect } from '../lib/auth/protect'
 import { restrict } from '../lib/auth/restrict'
 
 // types
 import { UserRole } from '@prisma/client'
+
+// validation
+import { postValidation } from '../validation/post'
+import {
+  validateCurrentUserRecordCreation,
+  validateCurrentUserRecordOwnership,
+  validateReqBody,
+} from '../validation'
 
 // Set up router
 const router = express.Router()
@@ -27,12 +37,16 @@ router.get('/test', postController.postTest)
 
 router.use(protect)
 
+// Comment
+
 // @route   POST api/v1/posts/current-user/comment
 // @desc    Creates current user comment
 // @access  Protected
 router.post(
   '/current-user/comment',
-  postController.postCreateCurrentUserComment
+  validateCurrentUserRecordCreation,
+  validateReqBody({ schema: postValidation.postCreateCommentReqBodySchema }),
+  postController.postCreateComment
 )
 
 // @route   PATCH api/v1/posts/current-user/comment/:id
@@ -40,7 +54,9 @@ router.post(
 // @access  Protected
 router.patch(
   '/current-user/comment/:id',
-  postController.postUpdateCurrentUserComment
+  validateCurrentUserRecordOwnership({ model: prisma.comment }),
+  validateReqBody({ schema: postValidation.postUpdateCommentReqBodySchema }),
+  postController.postUpdateComment
 )
 
 // @route   DELETE api/v1/posts/current-user/comment/:id
@@ -48,15 +64,22 @@ router.patch(
 // @access  Protected
 router.delete(
   '/current-user/comment/:id',
-  postController.postDeleteCurrentUserComment
+  validateCurrentUserRecordOwnership({ model: prisma.comment }),
+  postController.postDeleteComment
 )
+
+// CommentLike
 
 // @route   POST api/v1/posts/current-user/comment-like
 // @desc    Creates current user comment like
 // @access  Protected
 router.post(
   '/current-user/comment-like',
-  postController.postCreateCurrentUserCommentLike
+  validateCurrentUserRecordCreation,
+  validateReqBody({
+    schema: postValidation.postCreateCommentLikeReqBodySchema,
+  }),
+  postController.postCreateCommentLike
 )
 
 // @route   DELETE api/v1/posts/current-user/comment-like/:id
@@ -64,15 +87,20 @@ router.post(
 // @access  Protected
 router.delete(
   '/current-user/comment-like/:id',
-  postController.postDeleteCurrentUserCommentLike
+  validateCurrentUserRecordOwnership({ model: prisma.commentLike }),
+  postController.postDeleteCommentLike
 )
+
+// Post
 
 // @route   POST api/v1/posts/current-user/post
 // @desc    Creates current user post
 // @access  Protected
 router.post(
   '/current-user/post',
-  postController.postCreateCurrentUserPost
+  validateCurrentUserRecordCreation,
+  validateReqBody({ schema: postValidation.postCreatePostReqBodySchema }),
+  postController.postCreatePost
 )
 
 // @route   PATCH api/v1/posts/current-user/post/:id
@@ -80,7 +108,9 @@ router.post(
 // @access  Protected
 router.patch(
   '/current-user/post/:id',
-  postController.postUpdateCurrentUserPost
+  validateCurrentUserRecordOwnership({ model: prisma.post }),
+  validateReqBody({ schema: postValidation.postUpdatePostReqBodySchema }),
+  postController.postUpdatePost
 )
 
 // @route   DELETE api/v1/posts/current-user/post/:id
@@ -88,15 +118,20 @@ router.patch(
 // @access  Protected
 router.delete(
   '/current-user/post/:id',
-  postController.postDeleteCurrentUserPost
+  validateCurrentUserRecordOwnership({ model: prisma.post }),
+  postController.postDeletePost
 )
+
+// PostLike
 
 // @route   POST api/v1/posts/current-user/post-like
 // @desc    Creates current user post like
 // @access  Protected
 router.post(
   '/current-user/post-like',
-  postController.postCreateCurrentUserPostLike
+  validateCurrentUserRecordCreation,
+  validateReqBody({ schema: postValidation.postCreatePostLikeReqBodySchema }),
+  postController.postCreatePostLike
 )
 
 // @route   DELETE api/v1/posts/current-user/post-like/:id
@@ -104,13 +139,16 @@ router.post(
 // @access  Protected
 router.delete(
   '/current-user/post-like/:id',
-  postController.postDeleteCurrentUserPostLike
+  validateCurrentUserRecordOwnership({ model: prisma.postLike }),
+  postController.postDeletePostLike
 )
 
 ////////////////////
 // Restricted Routes
 
 router.use(restrict([UserRole.ADMIN]))
+
+// Comment
 
 // @route   GET api/v1/posts/comment/:id
 // @desc    Returns comment matching id parameter
@@ -137,6 +175,8 @@ router.patch('/comment/:id', postController.postUpdateComment)
 // @access  Restricted
 router.delete('/comment/:id', postController.postDeleteComment)
 
+// CommentLike
+
 // @route   GET api/v1/posts/comment-like/:id
 // @desc    Returns comment like matching id parameter
 // @access  Restricted
@@ -162,6 +202,8 @@ router.patch('/comment-like/:id', postController.postUpdateCommentLike)
 // @access  Restricted
 router.delete('/comment-like/:id', postController.postDeleteCommentLike)
 
+// Post
+
 // @route   GET api/v1/posts/post/:id
 // @desc    Returns post matching id parameter
 // @access  Restricted
@@ -186,6 +228,8 @@ router.patch('/post/:id', postController.postUpdatePost)
 // @desc    Deletes post matching id
 // @access  Restricted
 router.delete('/post/:id', postController.postDeletePost)
+
+// PostLike
 
 // @route   GET api/v1/posts/post-like/:id
 // @desc    Returns post like matching id parameter
