@@ -27,32 +27,6 @@ model Address {
   @@map("addresses")
 }
 
-model Attachment {
-  id               String  @id @default(uuid())
-  fileExtension    String? @map("file_extension")
-  fileKey          String  @map("file_key")
-  filename         String
-  originalFilename String  @map("original_filename")
-
-  title       String?
-  description String? @db.Text()
-  width       Int?
-  height      Int?
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @map("updated_at")
-
-  user      User?    @relation(fields: [userId], references: [id])
-  userId    String?  @map("user_id")
-  post      Post?    @relation(fields: [postId], references: [id])
-  postId    String?  @map("post_id")
-  pomment   Comment? @relation(fields: [commentId], references: [id])
-  commentId String?  @map("comment_id")
-
-  @@unique([userId, postId, commentId])
-  @@map("attachments")
-}
-
 model Comment {
   id   String @id @default(uuid())
   body String @db.Text()
@@ -67,7 +41,6 @@ model Comment {
   user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId          String   @map("user_id")
 
-  attachments  Attachment[]
   commentLikes CommentLike[]
   subComments  Comment[]     @relation("CommentSubComments")
 
@@ -105,9 +78,8 @@ model Post {
   user   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @map("user_id")
 
-  attachments Attachment[]
-  comments    Comment[]
-  postLikes   PostLike[]
+  comments  Comment[]
+  postLikes PostLike[]
 
   @@map("posts")
 }
@@ -170,7 +142,6 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  attachments     Attachment[]
   addresses       Address[]
   comments        Comment[]
   commentLikes    CommentLike[]

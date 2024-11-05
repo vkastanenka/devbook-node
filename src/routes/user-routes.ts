@@ -42,14 +42,12 @@ router.use(protect)
 // @access  Protected
 router.get('/username/:username', userController.userReadUsername)
 
-// User
+// Current user
 
 // @route   GET api/v1/users/current-user/user
 // @desc    Returns user associated with JWT
 // @access  Protected
 router.get('/current-user/user', userController.userReadCurrentUser)
-
-// User
 
 // @route   PATCH api/v1/users/current-user/user/:id
 // @desc    Updates current user

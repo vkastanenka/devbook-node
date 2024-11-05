@@ -16,28 +16,6 @@ const userTest = (req: Request, res: Response, next: NextFunction) => {
   return
 }
 
-// Returns user associated with session JWT
-const userReadCurrentUser = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  if (req.currentUser) {
-    new AppResponse({
-      data: req.currentUser,
-      message: 'Current user found!',
-      res,
-      statusCode: HttpStatusCode.OK,
-    }).respond()
-    return
-  }
-
-  throw new AppError({
-    message: 'Current user not found!',
-    statusCode: HttpStatusCode.NOT_FOUND,
-  })
-}
-
 // Get user based on username
 const userReadUsername = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -64,6 +42,33 @@ const userReadUsername = catchAsync(
   }
 )
 
+// Returns user associated with session JWT
+const userReadCurrentUser = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (req.currentUser) {
+    new AppResponse({
+      data: req.currentUser,
+      message: 'Current user found!',
+      res,
+      statusCode: HttpStatusCode.OK,
+    }).respond()
+    return
+  }
+
+  throw new AppError({
+    message: 'Current user not found!',
+    statusCode: HttpStatusCode.NOT_FOUND,
+  })
+}
+
+// Returns current user with contacts
+const userReadCurrentUserWithContacts = crudFactory.readRecord(prisma.user, {
+  include: { contacts: { orderBy: { name: 'asc' } } },
+})
+
 // User
 const userCreateUser = crudFactory.createRecord(prisma.user)
 const userReadUser = crudFactory.readRecord(prisma.user)
@@ -87,8 +92,9 @@ const userDeleteExperience = crudFactory.deleteRecord(prisma.userExperience)
 
 export const userController = {
   userTest,
-  userReadCurrentUser,
   userReadUsername,
+  userReadCurrentUser,
+  userReadCurrentUserWithContacts,
   userCreateUser,
   userReadUser,
   userReadAllUsers,
