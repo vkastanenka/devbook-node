@@ -37,17 +37,17 @@ router.get('/test', userController.userTest)
 
 router.use(protect)
 
-// @route   GET api/v1/users/current-user
-// @desc    Returns user associated with JWT
-// @access  Protected
-router.get('/current-user', userController.userReadCurrentUser)
-
 // @route   POST api/v1/users/username/:username
 // @desc    Gets user with relations
 // @access  Protected
 router.get('/username/:username', userController.userReadUsername)
 
 // User
+
+// @route   GET api/v1/users/current-user/user
+// @desc    Returns user associated with JWT
+// @access  Protected
+router.get('/current-user/user', userController.userReadCurrentUser)
 
 // @route   PATCH api/v1/users/current-user/user/:id
 // @desc    Updates current user

@@ -27,8 +27,8 @@ const router = express.Router()
 /////////////////
 // Public Routes
 
-// @route   GET api/v1/users/test
-// @desc    Tests users route
+// @route   GET api/v1/posts/test
+// @desc    Tests posts route
 // @access  Public
 router.get('/test', postController.postTest)
 
