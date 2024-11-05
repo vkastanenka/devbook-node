@@ -64,11 +64,6 @@ const userReadCurrentUser = (
   })
 }
 
-// Returns current user with contacts
-const userReadCurrentUserWithContacts = crudFactory.readRecord(prisma.user, {
-  include: { contacts: { orderBy: { name: 'asc' } } },
-})
-
 // User
 const userCreateUser = crudFactory.createRecord(prisma.user)
 const userReadUser = crudFactory.readRecord(prisma.user)
@@ -94,7 +89,6 @@ export const userController = {
   userTest,
   userReadUsername,
   userReadCurrentUser,
-  userReadCurrentUserWithContacts,
   userCreateUser,
   userReadUser,
   userReadAllUsers,
