@@ -16,7 +16,7 @@ export const authLoginReqBodySchema = z
 
 export const authRegisterReqBodySchema = z
   .object({
-    id: z.string(), // temporary
+    id: z.string().optional(), // temporary
     name: userNameSchema,
     email: emailSchema,
     username: userUsernameSchema,

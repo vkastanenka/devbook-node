@@ -27,10 +27,10 @@ router.get('/test', searchController.searchTest)
 
 router.use(protect)
 
-// @route   GET api/v1/search/devbook
+// @route   POST api/v1/search/devbook
 // @desc    Returns users whose name or username includes the body query
 // @access  Protected
-router.get(
+router.post(
   '/devbook',
   validateReqBody({ schema: searchValidation.searchDevbookReqBodySchema }),
   searchController.searchDevbook

@@ -111,9 +111,12 @@ const sendErrorDev = (err: any, req: Request, res: Response) => {
   // Rendered Website
   console.error('ERROR 💥', err)
 
-  return res.status(err.statusCode).render('error', {
-    title: 'Something went wrong!',
-    msg: err.message,
+  return res.status(err.statusCode).json({
+    errors: err.errors,
+    message: err.message,
+    status: err.status,
+    statusCode: err.statusCode,
+    success: err.success,
   })
 }
 
