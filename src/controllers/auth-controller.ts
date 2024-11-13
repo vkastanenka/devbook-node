@@ -19,8 +19,9 @@ import { Request, Response, NextFunction } from 'express'
 import {
   authLoginReqBodySchema,
   authRegisterReqBodySchema,
-  authResetPasswordReqBodySchema,
   authSendResetPasswordTokenReqBodySchema,
+  authResetPasswordReqBodySchema,
+  authUpdatePasswordReqBodySchema,
 } from '../validation/auth'
 
 // Test auth route
@@ -291,6 +292,52 @@ const authResetPassword = catchAsync(async (req, res, next) => {
   return
 })
 
+// Updates user password
+const authUpdatePassword = catchAsync(async (req, res, next) => {
+  // Prepare for potential errors
+  const errors: { [key: string]: string } = {}
+
+  // Validate body
+  authUpdatePasswordReqBodySchema.parse(req.body)
+
+  // Find user
+  const user = await prisma.user.findUnique({
+    where: {
+      id: req.currentUser?.id,
+    },
+    omit: { password: false },
+  })
+
+  // Check if currentPassword input matches real password
+  if (!(await bcrypt.compare(req.body.currentPassword, user?.password || ''))) {
+    errors.currentPassword = 'Current password is incorrect'
+    throw new AppError({
+      errors,
+      message: 'Unauthorized request!',
+      statusCode: HttpStatusCode.UNAUTHORIZED,
+    })
+  }
+
+  // If passwords match
+  await prisma.user.update({
+    where: {
+      id: req.currentUser?.id,
+    },
+    data: {
+      password: req.body.newPassword,
+      passwordUpdatedAt: new Date(),
+    },
+  })
+
+  // Respond
+  new AppResponse({
+    message: 'Password updated!',
+    res,
+    statusCode: HttpStatusCode.OK,
+  }).respond()
+  return
+})
+
 // Session
 const authCreateSession = crudFactory.createRecord(prisma.session)
 const authReadSession = crudFactory.readRecord(prisma.session)
@@ -304,6 +351,7 @@ export const authController = {
   authLogin,
   authSendResetPasswordToken,
   authResetPassword,
+  authUpdatePassword,
   authCreateSession,
   authReadSession,
   authReadAllSessions,

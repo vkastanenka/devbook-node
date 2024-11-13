@@ -24,14 +24,21 @@ export const authRegisterReqBodySchema = z
   })
   .strict()
 
+export const authSendResetPasswordTokenReqBodySchema = z
+  .object({
+    email: emailSchema,
+  })
+  .strict()
+
 export const authResetPasswordReqBodySchema = z
   .object({
     password: userPasswordSchema,
   })
   .strict()
 
-export const authSendResetPasswordTokenReqBodySchema = z
+export const authUpdatePasswordReqBodySchema = z
   .object({
-    email: emailSchema,
+    currentPassword: userPasswordSchema,
+    newPassword: userPasswordSchema,
   })
   .strict()

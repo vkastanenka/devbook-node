@@ -39,6 +39,11 @@ router.use(protect)
 
 // Comment
 
+// @route   POST api/v1/posts/comment/:id
+// @desc    Reads comment with args
+// @access  Protected
+router.post('/comment/:id', postController.postReadComment)
+
 // @route   POST api/v1/posts/current-user/comment
 // @desc    Creates current user comment
 // @access  Protected
@@ -92,6 +97,11 @@ router.delete(
 )
 
 // Post
+
+// @route   POST api/v1/posts/post/:id
+// @desc    Reads post with args
+// @access  Protected
+router.post('/post/:id', postController.postReadPost)
 
 // @route   POST api/v1/posts/current-user/post
 // @desc    Creates current user post

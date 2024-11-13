@@ -30,6 +30,7 @@ const readRecord = (Model: any) =>
       where: {
         id: req.params.id,
       },
+      ...(req.body ? req.body : {}),
     })
 
     // If no record, respond with an error

@@ -22,6 +22,7 @@ const userReadUsername = catchAsync(
     // Find username
     const user = await prisma.user.findUnique({
       where: { username: req.params.username },
+      ...req.body,
     })
 
     if (!user) {
@@ -43,26 +44,88 @@ const userReadUsername = catchAsync(
 )
 
 // Returns user associated with session JWT
-const userReadCurrentUser = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  if (req.currentUser) {
+const userReadCurrentUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.currentUser && req.body) {
+      const currentUser = await prisma.user.findUnique({
+        where: { id: req.currentUser.id },
+        ...req.body,
+      })
+
+      new AppResponse({
+        data: currentUser,
+        message: 'Current user found!',
+        res,
+        statusCode: HttpStatusCode.OK,
+      }).respond()
+      return
+    }
+
+    if (req.currentUser) {
+      new AppResponse({
+        data: req.currentUser,
+        message: 'Current user found!',
+        res,
+        statusCode: HttpStatusCode.OK,
+      }).respond()
+      return
+    }
+
+    throw new AppError({
+      message: 'Current user not found!',
+      statusCode: HttpStatusCode.NOT_FOUND,
+    })
+  }
+)
+
+// Returns current user feed
+const userReadCurrentUserFeed = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const currentUser = await prisma.user.findUnique({
+      where: { id: req.currentUser?.id },
+      include: {
+        contacts: true,
+      },
+    })
+
+    const contactIdFilters = currentUser?.contacts.map((contact) => ({
+      userId: {
+        equals: contact.id,
+      },
+    }))
+
+    const posts = await prisma.post.findMany({
+      orderBy: [
+        {
+          createdAt: 'desc',
+        },
+      ],
+      where: {
+        OR: [
+          {
+            userId: {
+              equals: req.currentUser?.id,
+            },
+          },
+          ...(contactIdFilters ? contactIdFilters : []),
+        ],
+      },
+      include: {
+        _count: { select: { comments: true, postLikes: true } },
+        postLikes: true,
+        user: true,
+      },
+    })
+
     new AppResponse({
-      data: req.currentUser,
-      message: 'Current user found!',
+      data: posts,
+      message: 'Current user feed found!',
       res,
       statusCode: HttpStatusCode.OK,
     }).respond()
     return
   }
-
-  throw new AppError({
-    message: 'Current user not found!',
-    statusCode: HttpStatusCode.NOT_FOUND,
-  })
-}
+)
 
 // User
 const userCreateUser = crudFactory.createRecord(prisma.user)
@@ -89,6 +152,7 @@ export const userController = {
   userTest,
   userReadUsername,
   userReadCurrentUser,
+  userReadCurrentUserFeed,
   userCreateUser,
   userReadUser,
   userReadAllUsers,

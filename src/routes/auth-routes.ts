@@ -55,6 +55,11 @@ router.patch('/reset-password/:token', authController.authResetPassword)
 
 router.use(protect)
 
+// @route   GET api/v1/auth/test
+// @desc    Tests auth route
+// @access  Public
+router.patch('/update-password', authController.authUpdatePassword)
+
 // @route   DELETE api/v1/auth/current-user/session/:id
 // @desc    Deletes current user session
 // @access  Protected

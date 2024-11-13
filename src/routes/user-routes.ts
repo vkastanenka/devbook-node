@@ -40,14 +40,19 @@ router.use(protect)
 // @route   Get api/v1/users/username/:username
 // @desc    Reads user with relations
 // @access  Protected
-router.get('/username/:username', userController.userReadUsername)
+router.post('/username/:username', userController.userReadUsername)
 
 // Current user
 
-// @route   GET api/v1/users/current-user/user
+// @route   POST api/v1/users/current-user/user
 // @desc    Returns user associated with JWT
 // @access  Protected
-router.get('/current-user/user', userController.userReadCurrentUser)
+router.post('/current-user/user', userController.userReadCurrentUser)
+
+// @route   POST api/v1/users/current-user/feed
+// @desc    Returns user associated with JWT
+// @access  Protected
+router.get('/current-user/feed', userController.userReadCurrentUserFeed)
 
 // @route   PATCH api/v1/users/current-user/user/:id
 // @desc    Updates current user
