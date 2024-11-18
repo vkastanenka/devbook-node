@@ -115,11 +115,74 @@ const userReadCurrentUserFeed = catchAsync(
         postLikes: true,
         user: true,
       },
+      skip: Number(req.query.skip) || 0,
+      take: Number(req.query.take) || 10,
     })
 
     new AppResponse({
       data: posts,
       message: 'Current user feed found!',
+      res,
+      statusCode: HttpStatusCode.OK,
+    }).respond()
+    return
+  }
+)
+
+// Toggles whether or not current user is contact with provided user
+const userToggleContact = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const currentUser = await prisma.user.findUnique({
+      where: { id: req.currentUser?.id },
+      include: {
+        contacts: { where: { id: { equals: req.params.id } } },
+      },
+    })
+
+    if (!currentUser) {
+      throw new AppError({
+        message: 'Current user not found!',
+        statusCode: HttpStatusCode.NOT_FOUND,
+      })
+    }
+
+    const currentUserReqBody = {
+      contacts: {
+        [currentUser.contacts.length > 0 ? 'disconnect' : 'connect']: [
+          {
+            id: req.params.id,
+          },
+        ],
+      },
+    }
+
+    const userReqBody = {
+      contacts: {
+        [currentUser.contacts.length > 0 ? 'disconnect' : 'connect']: [
+          {
+            id: currentUser.id,
+          },
+        ],
+      },
+    }
+
+    const updatedCurrentUser = await prisma.user.update({
+      where: {
+        id: req.currentUser?.id,
+      },
+      data: currentUserReqBody,
+    })
+
+    await prisma.user.update({
+      where: {
+        id: req.params.id,
+      },
+      data: userReqBody,
+    })
+
+    new AppResponse({
+      data: updatedCurrentUser,
+      message: 'Contact toggled!',
       res,
       statusCode: HttpStatusCode.OK,
     }).respond()
@@ -153,6 +216,7 @@ export const userController = {
   userReadUsername,
   userReadCurrentUser,
   userReadCurrentUserFeed,
+  userToggleContact,
   userCreateUser,
   userReadUser,
   userReadAllUsers,

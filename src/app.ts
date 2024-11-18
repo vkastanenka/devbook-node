@@ -60,7 +60,7 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }))
 // Preventing HTTP parameter pollution
 app.use(
   hpp({
-    whitelist: [],
+    whitelist: ['skip', 'take'],
   })
 )
 

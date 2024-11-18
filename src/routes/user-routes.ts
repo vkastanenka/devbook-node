@@ -64,6 +64,14 @@ router.patch(
   userController.userUpdateUser
 )
 
+// @route   POST api/v1/users/current-user/toggle-contact/:id
+// @desc    Updates current user and provided user contact info
+// @access  Protected
+router.post(
+  '/current-user/toggle-contact/:id',
+  userController.userToggleContact
+)
+
 // UserEducation
 
 // @route   POST api/v1/posts/current-user/education
@@ -129,7 +137,7 @@ router.delete(
 ////////////////////
 // Restricted Routes
 
-router.use(restrict([UserRole.ADMIN]))
+// router.use(restrict([UserRole.ADMIN]))
 
 // User
 
