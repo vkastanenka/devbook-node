@@ -7,8 +7,9 @@ import { catchAsync } from '../lib/error/catch-async'
 import { crudFactory } from '../lib/utils/crud-factory'
 
 // types
-import { HttpStatusCode } from '@vkastanenka/devbook-types/dist'
 import { Request, Response, NextFunction } from 'express'
+import { HttpStatusCode } from '@vkastanenka/devbook-types/dist'
+import { UserRelationQueryReqBody } from '@vkastanenka/devbook-types/dist/user'
 
 // Tests users route
 const userTest = (req: Request, res: Response, next: NextFunction) => {
@@ -19,10 +20,12 @@ const userTest = (req: Request, res: Response, next: NextFunction) => {
 // Get user based on username
 const userReadUsername = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    const reqBody: UserRelationQueryReqBody = req.body
+
     // Find username
     const user = await prisma.user.findUnique({
       where: { username: req.params.username },
-      ...req.body,
+      ...reqBody,
     })
 
     if (!user) {
@@ -47,9 +50,11 @@ const userReadUsername = catchAsync(
 const userReadCurrentUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     if (req.currentUser && req.body) {
+      const reqBody: UserRelationQueryReqBody = req.body
+
       const currentUser = await prisma.user.findUnique({
         where: { id: req.currentUser.id },
-        ...req.body,
+        ...reqBody,
       })
 
       new AppResponse({

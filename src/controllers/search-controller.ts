@@ -6,8 +6,9 @@ import { AppResponse } from '../lib/utils/app-response'
 import { catchAsync } from '../lib/error/catch-async'
 
 // types
-import { HttpStatusCode } from '@vkastanenka/devbook-types/dist'
 import { Request, Response, NextFunction } from 'express'
+import { HttpStatusCode } from '@vkastanenka/devbook-types/dist'
+import { SearchDevbookReqBody } from '@vkastanenka/devbook-types/dist/search'
 
 // Tests search route
 const searchTest = (req: Request, res: Response, next: NextFunction) => {
@@ -18,19 +19,21 @@ const searchTest = (req: Request, res: Response, next: NextFunction) => {
 // Returns models matching provided query
 const searchDevbook = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    const reqBody: SearchDevbookReqBody = req.body
+
     // Find users whose name or username contains the query
     const users = await prisma.user.findMany({
       where: {
         OR: [
           {
             name: {
-              contains: req.body.query,
+              contains: reqBody.query,
               mode: 'insensitive',
             },
           },
           {
             username: {
-              contains: req.body.query,
+              contains: reqBody.query,
               mode: 'insensitive',
             },
           },

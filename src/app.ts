@@ -73,6 +73,12 @@ app.use((req, res, next) => {
   next()
 })
 
+// Add errors object for easier handling
+app.use((req, res, next) => {
+  req.errors = {}
+  next()
+})
+
 // Apply routes
 app.use('/api/v1/addresses', addressRouter)
 app.use('/api/v1/auth', authRouter)

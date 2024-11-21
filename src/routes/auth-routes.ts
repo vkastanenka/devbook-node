@@ -11,9 +11,17 @@ import { protect } from '../lib/auth/protect'
 import { restrict } from '../lib/auth/restrict'
 
 // types
+import { Request, Response, NextFunction } from 'express'
 import { UserRole } from '@vkastanenka/devbook-prisma'
 
 // validation
+import {
+  authLoginReqBodySchema,
+  authRegisterReqBodySchema,
+  authSendResetPasswordTokenReqBodySchema,
+  authResetPasswordReqBodySchema,
+  authUpdatePasswordReqBodySchema,
+} from '@vkastanenka/devbook-validation/dist/auth'
 import { validateCurrentUserRecordOwnership } from '../validation'
 
 // Set up router
@@ -30,35 +38,67 @@ router.get('/test', authController.authTest)
 // @route   POST api/v1/auth/login
 // @desc    Login User / JWT Response
 // @access  Public
-router.post('/login', authController.authLogin)
+router.post(
+  '/login',
+  (req: Request, res: Response, next: NextFunction) => {
+    authLoginReqBodySchema.parse(req.body)
+    next()
+  },
+  authController.authLogin
+)
 
 // @route   POST api/v1/auth/register
 // @desc    Register user
 // @access  Public
-router.post('/register', authController.authRegister)
+router.post(
+  '/register',
+  (req: Request, res: Response, next: NextFunction) => {
+    authRegisterReqBodySchema.parse(req.body)
+    next()
+  },
+  authController.authRegister
+)
 
 // @route   POST api/v1/auth/send-reset-password-token
 // @desc    Send email with a reset password token
 // @access  Public
 router.post(
   '/send-reset-password-token',
+  (req: Request, res: Response, next: NextFunction) => {
+    authSendResetPasswordTokenReqBodySchema.parse(req.body)
+    next()
+  },
   authController.authSendResetPasswordToken
 )
 
 // @route   PATCH api/v1/auth/reset-password/:token
 // @desc    Resets user password with token
 // @access  Public
-router.patch('/reset-password/:token', authController.authResetPassword)
+router.patch(
+  '/reset-password/:token',
+  (req: Request, res: Response, next: NextFunction) => {
+    authResetPasswordReqBodySchema.parse(req.body)
+    next()
+  },
+  authController.authResetPassword
+)
 
 ///////////////////
 // Protected Routes
 
 router.use(protect)
 
-// @route   GET api/v1/auth/test
-// @desc    Tests auth route
+// @route   GET api/v1/auth/update-password
+// @desc    Updates password
 // @access  Public
-router.patch('/update-password', authController.authUpdatePassword)
+router.patch(
+  '/update-password',
+  (req: Request, res: Response, next: NextFunction) => {
+    authUpdatePasswordReqBodySchema.parse(req.body)
+    next()
+  },
+  authController.authUpdatePassword
+)
 
 // @route   DELETE api/v1/auth/current-user/session/:id
 // @desc    Deletes current user session

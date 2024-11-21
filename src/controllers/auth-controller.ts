@@ -12,17 +12,15 @@ import { createHash, randomBytes } from 'node:crypto'
 import { sendResetPasswordTokenEmail } from '../lib/utils/email'
 
 // types
-import { HttpStatusCode } from '@vkastanenka/devbook-types/dist'
 import { Request, Response, NextFunction } from 'express'
-
-// validation
+import { HttpStatusCode } from '@vkastanenka/devbook-types/dist'
 import {
-  authLoginReqBodySchema,
-  authRegisterReqBodySchema,
-  authSendResetPasswordTokenReqBodySchema,
-  authResetPasswordReqBodySchema,
-  authUpdatePasswordReqBodySchema,
-} from '@vkastanenka/devbook-validation/dist/auth'
+  AuthLoginReqBody,
+  AuthRegisterReqBody,
+  AuthSendResetPasswordTokenReqBody,
+  AuthResetPasswordReqBody,
+  AuthUpdatePasswordReqBody,
+} from '@vkastanenka/devbook-types/dist/auth'
 
 // Test auth route
 const authTest = (req: Request, res: Response, next: NextFunction) => {
@@ -38,16 +36,12 @@ const authTest = (req: Request, res: Response, next: NextFunction) => {
 // Login User / JWT Response
 const authLogin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    // Prepare for potential errors
-    const errors: { [key: string]: string } = {}
-
-    // Validate body
-    authLoginReqBodySchema.parse(req.body)
+    const reqBody: AuthLoginReqBody = req.body
 
     // Find user
     const user = await prisma.user.findUnique({
       where: {
-        email: req.body.email,
+        email: reqBody.email,
       },
       select: {
         id: true,
@@ -58,12 +52,12 @@ const authLogin = catchAsync(
     })
 
     // Res with error if no user or passwords don't match
-    if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
+    if (!user || !(await bcrypt.compare(reqBody.password, user.password))) {
       const errorMessage = 'Email and/or password are incorrect.'
-      errors.email = errorMessage
-      errors.password = errorMessage
+      req.errors.email = errorMessage
+      req.errors.password = errorMessage
       throw new AppError({
-        errors,
+        errors: req.errors,
         message: 'Invalid inputs!',
         statusCode: HttpStatusCode.BAD_REQUEST,
       })
@@ -118,30 +112,26 @@ const authLogin = catchAsync(
 // Register user
 const authRegister = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    // Prepare for potential errors
-    const errors: { [key: string]: string } = {}
-
-    // Validate body
-    authRegisterReqBodySchema.parse(req.body)
+    const reqBody: AuthRegisterReqBody = req.body
 
     // Check if email is taken
     const emailCheck = await prisma.user.findUnique({
-      where: { email: req.body.email },
+      where: { email: reqBody.email },
     })
 
-    if (emailCheck) errors.email = 'Email in use'
+    if (emailCheck) req.errors.email = 'Email in use'
 
     // Check if username is taken
     const usernameCheck = await prisma.user.findUnique({
-      where: { username: req.body.username },
+      where: { username: reqBody.username },
     })
 
-    if (usernameCheck) errors.username = 'Username in use'
+    if (usernameCheck) req.errors.username = 'Username in use'
 
     // If any bad request errors, send response
-    if (Object.keys(errors).length) {
+    if (Object.keys(req.errors).length) {
       throw new AppError({
-        errors,
+        errors: req.errors,
         message: `Duplicate field value(s)`,
         statusCode: HttpStatusCode.BAD_REQUEST,
       })
@@ -149,7 +139,7 @@ const authRegister = catchAsync(
 
     // Create new user
     const newUser = await prisma.user.create({
-      data: req.body,
+      data: reqBody,
     })
 
     // Respond
@@ -166,23 +156,19 @@ const authRegister = catchAsync(
 // Send email with a reset password token
 const authSendResetPasswordToken = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    // Prepare for potential errors
-    const errors: { [key: string]: string } = {}
-
-    // Validate body
-    authSendResetPasswordTokenReqBodySchema.parse(req.body)
+    const reqBody: AuthSendResetPasswordTokenReqBody = req.body
 
     // Find user
     const user = await prisma.user.findUnique({
       where: {
-        email: req.body.email,
+        email: reqBody.email,
       },
     })
 
     if (!user) {
-      errors.email = 'No user found with email!'
+      req.errors.email = 'No user found with email!'
       throw new AppError({
-        errors,
+        errors: req.errors,
         message: 'User not found!',
         statusCode: HttpStatusCode.NOT_FOUND,
       })
@@ -242,101 +228,102 @@ const authSendResetPasswordToken = catchAsync(
 )
 
 // Resets user password with token
-const authResetPassword = catchAsync(async (req, res, next) => {
-  // Validate body
-  authResetPasswordReqBodySchema.parse(req.body)
+const authResetPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const reqBody: AuthResetPasswordReqBody = req.body
 
-  // Find user
-  const user = await prisma.user.findFirst({
-    where: {
-      resetPasswordToken: req.params.token,
-    },
-    select: {
-      id: true,
-      resetPasswordToken: true,
-      resetPasswordTokenExpires: true,
-    },
-  })
-
-  // Check if user with token exists or token has expired
-  if (
-    !user ||
-    (user?.resetPasswordTokenExpires &&
-      new Date() > user?.resetPasswordTokenExpires)
-  ) {
-    throw new AppError({
-      message: 'Token is invalid or expired.',
-      statusCode: HttpStatusCode.UNAUTHORIZED,
+    // Find user
+    const user = await prisma.user.findFirst({
+      where: {
+        resetPasswordToken: req.params.token,
+      },
+      select: {
+        id: true,
+        resetPasswordToken: true,
+        resetPasswordTokenExpires: true,
+      },
     })
+
+    // Check if user with token exists or token has expired
+    if (
+      !user ||
+      (user?.resetPasswordTokenExpires &&
+        new Date() > user?.resetPasswordTokenExpires)
+    ) {
+      throw new AppError({
+        message: 'Token is invalid or expired.',
+        statusCode: HttpStatusCode.UNAUTHORIZED,
+      })
+    }
+
+    // If token is valid and not expired, set the new password
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        password: reqBody.password,
+        resetPasswordToken: null,
+        resetPasswordTokenExpires: null,
+        passwordUpdatedAt: new Date(),
+      },
+    })
+
+    // Respond
+    new AppResponse({
+      message: 'Password reset!',
+      res,
+      statusCode: HttpStatusCode.OK,
+    }).respond()
+    return
   }
-
-  // If token is valid and not expired, set the new password
-  await prisma.user.update({
-    where: {
-      id: user.id,
-    },
-    data: {
-      password: req.body.password,
-      resetPasswordToken: null,
-      resetPasswordTokenExpires: null,
-      passwordUpdatedAt: new Date(),
-    },
-  })
-
-  // Respond
-  new AppResponse({
-    message: 'Password reset!',
-    res,
-    statusCode: HttpStatusCode.OK,
-  }).respond()
-  return
-})
+)
 
 // Updates user password
-const authUpdatePassword = catchAsync(async (req, res, next) => {
-  // Prepare for potential errors
-  const errors: { [key: string]: string } = {}
+const authUpdatePassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const reqBody: AuthUpdatePasswordReqBody = req.body
 
-  // Validate body
-  authUpdatePasswordReqBodySchema.parse(req.body)
-
-  // Find user
-  const user = await prisma.user.findUnique({
-    where: {
-      id: req.currentUser?.id,
-    },
-    omit: { password: false },
-  })
-
-  // Check if currentPassword input matches real password
-  if (!(await bcrypt.compare(req.body.currentPassword, user?.password || ''))) {
-    errors.currentPassword = 'Current password is incorrect'
-    throw new AppError({
-      errors,
-      message: 'Unauthorized request!',
-      statusCode: HttpStatusCode.UNAUTHORIZED,
+    // Find user
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.currentUser?.id,
+      },
+      omit: { password: false },
     })
+
+    // Check if currentPassword input matches real password
+    if (
+      !(await bcrypt.compare(reqBody.currentPassword, user?.password || ''))
+    ) {
+      req.errors.currentPassword = 'Current password is incorrect'
+      throw new AppError({
+        errors: req.errors,
+        message: 'Unauthorized request!',
+        statusCode: HttpStatusCode.UNAUTHORIZED,
+      })
+    }
+
+    // If passwords match
+    await prisma.user.update({
+      where: {
+        id: req.currentUser?.id,
+      },
+      data: {
+        password: reqBody.newPassword,
+        passwordUpdatedAt: new Date(),
+      },
+    })
+
+    // Respond
+    new AppResponse({
+      message: 'Password updated!',
+      res,
+      statusCode: HttpStatusCode.OK,
+    }).respond()
+    return
   }
-
-  // If passwords match
-  await prisma.user.update({
-    where: {
-      id: req.currentUser?.id,
-    },
-    data: {
-      password: req.body.newPassword,
-      passwordUpdatedAt: new Date(),
-    },
-  })
-
-  // Respond
-  new AppResponse({
-    message: 'Password updated!',
-    res,
-    statusCode: HttpStatusCode.OK,
-  }).respond()
-  return
-})
+)
 
 // Session
 const authCreateSession = crudFactory.createRecord(prisma.session)
