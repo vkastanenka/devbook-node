@@ -11,10 +11,16 @@ import { protect } from '../lib/auth/protect'
 import { restrict } from '../lib/auth/restrict'
 
 // types
-import { UserRole } from '@prisma/client'
+import { UserRole } from '@vkastanenka/devbook-prisma'
 
 // validation
-import { userValidation } from '../validation/user'
+import {
+  userUpdateUserReqBodySchema,
+  userCreateEducationReqBodySchema,
+  userUpdateEducationReqBodySchema,
+  userCreateExperienceReqBodySchema,
+  userUpdateExperienceReqBodySchema,
+} from '@vkastanenka/devbook-validation/dist/user'
 import {
   validateCurrentUserRecordCreation,
   validateCurrentUserRecordOwnership,
@@ -60,7 +66,7 @@ router.get('/current-user/feed', userController.userReadCurrentUserFeed)
 router.patch(
   '/current-user/user/:id',
   validateCurrentUserRecordOwnership({ idField: 'id', model: prisma.user }),
-  validateReqBody({ schema: userValidation.userUpdateUserReqBodySchema }),
+  validateReqBody({ schema: userUpdateUserReqBodySchema }),
   userController.userUpdateUser
 )
 
@@ -80,7 +86,7 @@ router.post(
 router.post(
   '/current-user/education',
   validateCurrentUserRecordCreation,
-  validateReqBody({ schema: userValidation.userCreateEducationReqBodySchema }),
+  validateReqBody({ schema: userCreateEducationReqBodySchema }),
   userController.userCreateEducation
 )
 
@@ -90,7 +96,7 @@ router.post(
 router.patch(
   '/current-user/education/:id',
   validateCurrentUserRecordOwnership({ model: prisma.userEducation }),
-  validateReqBody({ schema: userValidation.userUpdateEducationReqBodySchema }),
+  validateReqBody({ schema: userUpdateEducationReqBodySchema }),
   userController.userUpdateEducation
 )
 
@@ -111,7 +117,7 @@ router.delete(
 router.post(
   '/current-user/experience',
   validateCurrentUserRecordCreation,
-  validateReqBody({ schema: userValidation.userCreateExperienceReqBodySchema }),
+  validateReqBody({ schema: userCreateExperienceReqBodySchema }),
   userController.userCreateExperience
 )
 
@@ -121,7 +127,7 @@ router.post(
 router.patch(
   '/current-user/experience/:id',
   validateCurrentUserRecordOwnership({ model: prisma.userExperience }),
-  validateReqBody({ schema: userValidation.userUpdateExperienceReqBodySchema }),
+  validateReqBody({ schema: userUpdateExperienceReqBodySchema }),
   userController.userUpdateExperience
 )
 
@@ -137,7 +143,7 @@ router.delete(
 ////////////////////
 // Restricted Routes
 
-// router.use(restrict([UserRole.ADMIN]))
+router.use(restrict([UserRole.ADMIN]))
 
 // User
 

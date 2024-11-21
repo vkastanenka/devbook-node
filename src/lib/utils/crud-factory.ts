@@ -4,7 +4,7 @@ import { AppResponse } from './app-response'
 import { catchAsync } from '../error/catch-async'
 
 // types
-import { HttpStatusCode } from '../../types/http-status-code'
+import { HttpStatusCode } from '@vkastanenka/devbook-types/dist'
 
 // Create a single record
 const createRecord = (Model: any) =>

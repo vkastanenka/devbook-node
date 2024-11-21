@@ -11,10 +11,16 @@ import { protect } from '../lib/auth/protect'
 import { restrict } from '../lib/auth/restrict'
 
 // types
-import { UserRole } from '@prisma/client'
+import { UserRole } from '@vkastanenka/devbook-prisma'
 
 // validation
-import { postValidation } from '../validation/post'
+import {
+  postCreateCommentReqBodySchema,
+  postUpdateCommentReqBodySchema,
+  postCreatePostReqBodySchema,
+  postUpdatePostReqBodySchema,
+  postCreatePostLikeReqBodySchema,
+} from '@vkastanenka/devbook-validation/dist/post'
 import {
   validateCurrentUserRecordCreation,
   validateCurrentUserRecordOwnership,
@@ -50,7 +56,7 @@ router.post('/comment/:id', postController.postReadComment)
 router.post(
   '/current-user/comment',
   validateCurrentUserRecordCreation,
-  validateReqBody({ schema: postValidation.postCreateCommentReqBodySchema }),
+  validateReqBody({ schema: postCreateCommentReqBodySchema }),
   postController.postCreateComment
 )
 
@@ -60,7 +66,7 @@ router.post(
 router.patch(
   '/current-user/comment/:id',
   validateCurrentUserRecordOwnership({ model: prisma.comment }),
-  validateReqBody({ schema: postValidation.postUpdateCommentReqBodySchema }),
+  validateReqBody({ schema: postUpdateCommentReqBodySchema }),
   postController.postUpdateComment
 )
 
@@ -71,29 +77,6 @@ router.delete(
   '/current-user/comment/:id',
   validateCurrentUserRecordOwnership({ model: prisma.comment }),
   postController.postDeleteComment
-)
-
-// CommentLike
-
-// @route   POST api/v1/posts/current-user/comment-like
-// @desc    Creates current user comment like
-// @access  Protected
-router.post(
-  '/current-user/comment-like',
-  validateCurrentUserRecordCreation,
-  validateReqBody({
-    schema: postValidation.postCreateCommentLikeReqBodySchema,
-  }),
-  postController.postCreateCommentLike
-)
-
-// @route   DELETE api/v1/posts/current-user/comment-like/:id
-// @desc    Deletes current user comment like
-// @access  Protected
-router.delete(
-  '/current-user/comment-like/:id',
-  validateCurrentUserRecordOwnership({ model: prisma.commentLike }),
-  postController.postDeleteCommentLike
 )
 
 // Post
@@ -109,7 +92,7 @@ router.post('/post/:id', postController.postReadPost)
 router.post(
   '/current-user/post',
   validateCurrentUserRecordCreation,
-  validateReqBody({ schema: postValidation.postCreatePostReqBodySchema }),
+  validateReqBody({ schema: postCreatePostReqBodySchema }),
   postController.postCreatePost
 )
 
@@ -119,7 +102,7 @@ router.post(
 router.patch(
   '/current-user/post/:id',
   validateCurrentUserRecordOwnership({ model: prisma.post }),
-  validateReqBody({ schema: postValidation.postUpdatePostReqBodySchema }),
+  validateReqBody({ schema: postUpdatePostReqBodySchema }),
   postController.postUpdatePost
 )
 
@@ -140,7 +123,7 @@ router.delete(
 router.post(
   '/current-user/post-like',
   validateCurrentUserRecordCreation,
-  validateReqBody({ schema: postValidation.postCreatePostLikeReqBodySchema }),
+  validateReqBody({ schema: postCreatePostLikeReqBodySchema }),
   postController.postCreatePostLike
 )
 
@@ -184,33 +167,6 @@ router.patch('/comment/:id', postController.postUpdateComment)
 // @desc    Deletes comment matching id
 // @access  Restricted
 router.delete('/comment/:id', postController.postDeleteComment)
-
-// CommentLike
-
-// @route   POST api/v1/posts/comment-like
-// @desc    Creates comment like
-// @access  Restricted
-router.post('/comment-like', postController.postCreateCommentLike)
-
-// @route   GET api/v1/posts/comment-like/:id
-// @desc    Returns comment like matching id parameter
-// @access  Restricted
-router.get('/comment-like/:id', postController.postReadCommentLike)
-
-// @route   GET api/v1/posts/comment-likes
-// @desc    Get all comment likes
-// @access  Restricted
-router.get('/comment-likes', postController.postReadAllCommentLikes)
-
-// @route   PATCH api/v1/posts/comment-like/:id
-// @desc    Updates comment like matching id
-// @access  Restricted
-router.patch('/comment-like/:id', postController.postUpdateCommentLike)
-
-// @route   DELETE api/v1/posts/comment-like/:id
-// @desc    Deletes comment like matching id
-// @access  Restricted
-router.delete('/comment-like/:id', postController.postDeleteCommentLike)
 
 // Post
 

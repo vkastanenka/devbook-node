@@ -19,13 +19,6 @@ const postReadAllComments = crudFactory.readAllRecords(prisma.comment)
 const postUpdateComment = crudFactory.updateRecord(prisma.comment)
 const postDeleteComment = crudFactory.deleteRecord(prisma.comment)
 
-// CommentLike
-const postCreateCommentLike = crudFactory.createRecord(prisma.commentLike)
-const postReadCommentLike = crudFactory.readRecord(prisma.commentLike)
-const postReadAllCommentLikes = crudFactory.readAllRecords(prisma.commentLike)
-const postUpdateCommentLike = crudFactory.updateRecord(prisma.commentLike)
-const postDeleteCommentLike = crudFactory.deleteRecord(prisma.commentLike)
-
 // Post
 const postCreatePost = crudFactory.createRecord(prisma.post)
 const postReadPost = crudFactory.readRecord(prisma.post)
@@ -47,11 +40,6 @@ export const postController = {
   postReadAllComments,
   postUpdateComment,
   postDeleteComment,
-  postCreateCommentLike,
-  postReadCommentLike,
-  postReadAllCommentLikes,
-  postUpdateCommentLike,
-  postDeleteCommentLike,
   postCreatePost,
   postReadPost,
   postReadAllPosts,

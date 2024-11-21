@@ -1,5 +1,5 @@
 // types
-import { HttpStatusCode } from '../../types/http-status-code'
+import { HttpStatusCode } from '@vkastanenka/devbook-types/dist'
 import { Response } from 'express'
 
 // AppResponse object for providing meaningful responses

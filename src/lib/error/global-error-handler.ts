@@ -1,13 +1,13 @@
 // utils
 import { AppError } from './app-error'
-import { Prisma } from '@prisma/client'
+import { Prisma } from '@vkastanenka/devbook-prisma'
 
 // types
 import { Request, Response, NextFunction } from 'express'
 import { ZodError } from 'zod'
 
 // constants
-import { HttpStatusCode } from '../../types/http-status-code'
+import { HttpStatusCode } from '@vkastanenka/devbook-types/dist'
 
 // Prisma client known request error handler
 const handlePrismaClientKnownRequestError = (
@@ -16,7 +16,6 @@ const handlePrismaClientKnownRequestError = (
   res: Response,
   next: NextFunction
 ) => {
-  console.log(err.code)
   switch (err.code) {
     // "Unique constraint failed on the {constraint}"
     case 'P2002':

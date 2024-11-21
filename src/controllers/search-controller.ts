@@ -6,7 +6,7 @@ import { AppResponse } from '../lib/utils/app-response'
 import { catchAsync } from '../lib/error/catch-async'
 
 // types
-import { HttpStatusCode } from '../types/http-status-code'
+import { HttpStatusCode } from '@vkastanenka/devbook-types/dist'
 import { Request, Response, NextFunction } from 'express'
 
 // Tests search route

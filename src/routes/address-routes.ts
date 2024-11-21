@@ -11,10 +11,13 @@ import { protect } from '../lib/auth/protect'
 import { restrict } from '../lib/auth/restrict'
 
 // types
-import { UserRole } from '@prisma/client'
+import { UserRole } from '@vkastanenka/devbook-prisma'
 
 // validation
-import { addressValidation } from '../validation/address'
+import {
+  addressCreateAddressReqBodySchema,
+  addressUpdateAddressReqBodySchema,
+} from '@vkastanenka/devbook-validation/dist/address'
 import {
   validateCurrentUserRecordCreation,
   validateCurrentUserRecordOwnership,
@@ -44,7 +47,7 @@ router.post(
   '/current-user/address',
   validateCurrentUserRecordCreation,
   validateReqBody({
-    schema: addressValidation.addressCreateAddressReqBodySchema,
+    schema: addressCreateAddressReqBodySchema,
   }),
   addressController.addressCreateAddress
 )
@@ -56,7 +59,7 @@ router.patch(
   '/current-user/address/:id',
   validateCurrentUserRecordOwnership({ model: prisma.address }),
   validateReqBody({
-    schema: addressValidation.addressUpdateAddressReqBodySchema,
+    schema: addressUpdateAddressReqBodySchema,
   }),
   addressController.addressUpdateAddress
 )

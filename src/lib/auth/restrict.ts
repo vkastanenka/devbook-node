@@ -2,7 +2,7 @@
 import { AppError } from '../error/app-error'
 
 // types
-import { HttpStatusCode } from '../../types/http-status-code'
+import { HttpStatusCode } from '@vkastanenka/devbook-types/dist'
 import { Request, Response, NextFunction } from 'express'
 
 // Restricts paths based on provided role

@@ -1,5 +1,5 @@
 // types
-import { HttpStatusCode } from "../../types/http-status-code"
+import { HttpStatusCode } from '@vkastanenka/devbook-types/dist'
 
 // AppError object for providing meaningful errors
 export class AppError extends Error {

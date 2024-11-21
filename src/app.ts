@@ -19,7 +19,7 @@ import { postRouter } from './routes/post-routes'
 import { userRouter } from './routes/user-routes'
 
 // types
-import { HttpStatusCode } from './types/http-status-code'
+import { HttpStatusCode } from '@vkastanenka/devbook-types/dist'
 
 // Set up env variables
 dotenv.config()
@@ -43,12 +43,12 @@ app.options('*', cors())
 app.use(helmet())
 app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }))
 
-// Implementing rate limiting: 500 requests every hour
-// const limiter = rateLimit({
-//   max: 500,
-//   windowMs: 60 * 60 * 1000,
-//   message: 'Too many requests from this IP, please try again in an hour!',
-// })
+// Implementing rate limiting: 2000 requests every hour
+const limiter = rateLimit({
+  max: 2000,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many requests from this IP, please try again in an hour!',
+})
 
 // Will now have X-RateLimit-Limit and X-RateLimit-Remaining headers
 // app.use('/api', limiter)

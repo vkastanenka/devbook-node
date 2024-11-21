@@ -14,7 +14,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@vkastanenka/devbook-validation": "^0.0.4",
+    "@vkastanenka/devbook-prisma": "^0.0.1",
+    "@vkastanenka/devbook-validation": "^0.0.5",
     "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",
     "concurrently": "^9.0.1",

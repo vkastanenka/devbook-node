@@ -7,7 +7,7 @@ import { catchAsync } from '../lib/error/catch-async'
 import { crudFactory } from '../lib/utils/crud-factory'
 
 // types
-import { HttpStatusCode } from '../types/http-status-code'
+import { HttpStatusCode } from '@vkastanenka/devbook-types/dist'
 import { Request, Response, NextFunction } from 'express'
 
 // Tests users route

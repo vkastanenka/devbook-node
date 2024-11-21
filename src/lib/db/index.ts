@@ -1,6 +1,6 @@
 // utils
 import { hashPassword } from '../auth/hash-password'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@vkastanenka/devbook-prisma'
 
 const prismaClientSingleton = () => {
   return new PrismaClient({

@@ -6,7 +6,7 @@ import { AppError } from '../error/app-error'
 import { catchAsync } from '../error/catch-async'
 
 // types
-import { HttpStatusCode } from '../../types/http-status-code'
+import { HttpStatusCode } from '@vkastanenka/devbook-types/dist'
 import { Request, Response, NextFunction } from 'express'
 
 // Privatizes routes and makes accessible only to users with valid jwt session token

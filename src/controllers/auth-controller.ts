@@ -12,7 +12,7 @@ import { createHash, randomBytes } from 'node:crypto'
 import { sendResetPasswordTokenEmail } from '../lib/utils/email'
 
 // types
-import { HttpStatusCode } from '../types/http-status-code'
+import { HttpStatusCode } from '@vkastanenka/devbook-types/dist'
 import { Request, Response, NextFunction } from 'express'
 
 // validation
@@ -22,7 +22,7 @@ import {
   authSendResetPasswordTokenReqBodySchema,
   authResetPasswordReqBodySchema,
   authUpdatePasswordReqBodySchema,
-} from '../validation/auth'
+} from '@vkastanenka/devbook-validation/dist/auth'
 
 // Test auth route
 const authTest = (req: Request, res: Response, next: NextFunction) => {

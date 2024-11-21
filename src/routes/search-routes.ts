@@ -8,7 +8,7 @@ import { searchController } from '../controllers/search-controller'
 import { protect } from '../lib/auth/protect'
 
 // validation
-import { searchValidation } from '../validation/search'
+import { searchDevbookReqBodySchema } from '@vkastanenka/devbook-validation/dist/search'
 import { validateReqBody } from '../validation'
 
 // Set up router
@@ -32,7 +32,7 @@ router.use(protect)
 // @access  Protected
 router.post(
   '/devbook',
-  validateReqBody({ schema: searchValidation.searchDevbookReqBodySchema }),
+  validateReqBody({ schema: searchDevbookReqBodySchema }),
   searchController.searchDevbook
 )
 

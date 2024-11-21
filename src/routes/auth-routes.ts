@@ -11,7 +11,7 @@ import { protect } from '../lib/auth/protect'
 import { restrict } from '../lib/auth/restrict'
 
 // types
-import { UserRole } from '@prisma/client'
+import { UserRole } from '@vkastanenka/devbook-prisma'
 
 // validation
 import { validateCurrentUserRecordOwnership } from '../validation'
