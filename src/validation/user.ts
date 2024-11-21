@@ -155,10 +155,10 @@ export const userCreateEducationReqBodySchema = z
   .strict()
   .refine((s) => {
     if (s.endYear) {
-      if (Number(s.endYear) > Number(s.startYear)) return false
+      if (Number(s.startYear) > Number(s.endYear)) return false
     }
     return true
-  }, 'End year cannot be greater than start year')
+  }, 'Start year cannot be greater than end year')
 
 export const userUpdateEducationReqBodySchema = z
   .object({
@@ -170,10 +170,10 @@ export const userUpdateEducationReqBodySchema = z
   .strict()
   .refine((s) => {
     if (s.endYear) {
-      if (Number(s.endYear) > Number(s.startYear)) return false
+      if (Number(s.startYear) > Number(s.endYear)) return false
     }
     return true
-  }, 'End year cannot be greater than start year')
+  }, 'Start year cannot be greater than end year')
 
 export const userCreateExperienceReqBodySchema = z
   .object({
@@ -189,10 +189,10 @@ export const userCreateExperienceReqBodySchema = z
   .strict()
   .refine((s) => {
     if (s.endYear) {
-      if (Number(s.endYear) > Number(s.startYear)) return false
+      if (Number(s.startYear) > Number(s.endYear)) return false
     }
     return true
-  }, 'End year cannot be greater than start year')
+  }, 'Start year cannot be greater than end year')
 
 export const userUpdateExperienceReqBodySchema = z
   .object({
@@ -207,10 +207,10 @@ export const userUpdateExperienceReqBodySchema = z
   .strict()
   .refine((s) => {
     if (s.endYear) {
-      if (Number(s.endYear) > Number(s.startYear)) return false
+      if (Number(s.startYear) > Number(s.endYear)) return false
     }
     return true
-  }, 'End year cannot be greater than start year')
+  }, 'Start year cannot be greater than end year')
 
 export const userValidation = {
   userUpdateUserReqBodySchema,

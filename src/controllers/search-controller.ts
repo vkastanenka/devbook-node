@@ -36,6 +36,11 @@ const searchDevbook = catchAsync(
           },
         ],
       },
+      include: {
+        contacts: {
+          select: { id: true },
+        },
+      },
     })
 
     if (!users?.length) {
