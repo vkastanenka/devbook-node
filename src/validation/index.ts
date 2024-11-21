@@ -42,14 +42,6 @@ export const validateCurrentUserRecordOwnership = ({
       },
     })
 
-    // If no record, respond with an error
-    if (!record) {
-      throw new AppError({
-        message: 'Record not found!',
-        statusCode: HttpStatusCode.NOT_FOUND,
-      })
-    }
-
     // If record user id does not match current user id
     if (req.currentUser?.id !== record[idField]) {
       throw new AppError({

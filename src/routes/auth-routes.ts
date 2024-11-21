@@ -11,7 +11,6 @@ import { protect } from '../lib/auth/protect'
 import { restrict } from '../lib/auth/restrict'
 
 // types
-import { Request, Response, NextFunction } from 'express'
 import { UserRole } from '@vkastanenka/devbook-prisma'
 
 // validation
@@ -22,7 +21,10 @@ import {
   authResetPasswordReqBodySchema,
   authUpdatePasswordReqBodySchema,
 } from '@vkastanenka/devbook-validation/dist/auth'
-import { validateCurrentUserRecordOwnership } from '../validation'
+import {
+  validateCurrentUserRecordOwnership,
+  validateReqBody,
+} from '../validation'
 
 // Set up router
 const router = express.Router()
@@ -40,10 +42,9 @@ router.get('/test', authController.authTest)
 // @access  Public
 router.post(
   '/login',
-  (req: Request, res: Response, next: NextFunction) => {
-    authLoginReqBodySchema.parse(req.body)
-    next()
-  },
+  validateReqBody({
+    schema: authLoginReqBodySchema,
+  }),
   authController.authLogin
 )
 
@@ -52,10 +53,9 @@ router.post(
 // @access  Public
 router.post(
   '/register',
-  (req: Request, res: Response, next: NextFunction) => {
-    authRegisterReqBodySchema.parse(req.body)
-    next()
-  },
+  validateReqBody({
+    schema: authRegisterReqBodySchema,
+  }),
   authController.authRegister
 )
 
@@ -64,10 +64,9 @@ router.post(
 // @access  Public
 router.post(
   '/send-reset-password-token',
-  (req: Request, res: Response, next: NextFunction) => {
-    authSendResetPasswordTokenReqBodySchema.parse(req.body)
-    next()
-  },
+  validateReqBody({
+    schema: authSendResetPasswordTokenReqBodySchema,
+  }),
   authController.authSendResetPasswordToken
 )
 
@@ -76,10 +75,9 @@ router.post(
 // @access  Public
 router.patch(
   '/reset-password/:token',
-  (req: Request, res: Response, next: NextFunction) => {
-    authResetPasswordReqBodySchema.parse(req.body)
-    next()
-  },
+  validateReqBody({
+    schema: authResetPasswordReqBodySchema,
+  }),
   authController.authResetPassword
 )
 
@@ -93,10 +91,9 @@ router.use(protect)
 // @access  Public
 router.patch(
   '/update-password',
-  (req: Request, res: Response, next: NextFunction) => {
-    authUpdatePasswordReqBodySchema.parse(req.body)
-    next()
-  },
+  validateReqBody({
+    schema: authUpdatePasswordReqBodySchema,
+  }),
   authController.authUpdatePassword
 )
 
