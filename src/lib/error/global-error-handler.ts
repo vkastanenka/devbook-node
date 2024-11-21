@@ -94,8 +94,8 @@ const handleZodError = (
   })
 }
 
-// Send error messages in dev env
-const sendErrorDev = (err: any, req: Request, res: Response) => {
+// Send error messages
+const sendError = (err: any, req: Request, res: Response) => {
   // API
   if (req.originalUrl.startsWith('/api')) {
     return res.status(err.statusCode).json({
@@ -116,48 +116,6 @@ const sendErrorDev = (err: any, req: Request, res: Response) => {
     status: err.status,
     statusCode: err.statusCode,
     success: err.success,
-  })
-}
-
-// Send error messages in prod env
-const sendErrorProd = (err: any, req: Request, res: Response) => {
-  // API
-
-  if (req.originalUrl.startsWith('/api')) {
-    // Responding to operational errors: Trusted errors
-    if (err.isOperational) {
-      return res.status(err.statusCode).json({
-        status: err.status,
-        message: err.message,
-      })
-    }
-
-    // Responding to programming or other unknown errors: Don't leak details
-    console.error('ERROR 💥', err)
-
-    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-      status: 'error',
-      message: 'Something went very wrong!',
-    })
-  }
-
-  // Rendered Website
-
-  // Responding to operational errors: Trusted errors
-  if (err.isOperational) {
-    return res.status(err.statusCode).render('error', {
-      title: 'Something went wrong!',
-      msg: err.message,
-    })
-  }
-
-  // Responding to programming or other unknown errors: Don't leak details
-  console.error('ERROR 💥', err)
-
-  // Send generic message
-  return res.status(err.statusCode).render('error', {
-    title: 'Something went wrong!',
-    msg: 'Please try again later...',
   })
 }
 
@@ -188,9 +146,5 @@ export const globalErrorHandler = (
     err = handleZodError(err, req, res, next)
   }
 
-  if (process.env.NODE_ENV === 'development') {
-    sendErrorDev(err, req, res)
-  } else if (process.env.NODE_ENV === 'production') {
-    sendErrorProd(err, req, res)
-  }
+  sendError(err, req, res)
 }

@@ -28,13 +28,6 @@ const userReadUsername = catchAsync(
       ...reqBody,
     })
 
-    if (!user) {
-      throw new AppError({
-        message: 'User not found!',
-        statusCode: HttpStatusCode.NOT_FOUND,
-      })
-    }
-
     // Respond
     new AppResponse({
       data: user,

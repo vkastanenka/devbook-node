@@ -51,7 +51,7 @@ const readRecord = (Model: any) =>
     return
   })
 
-// Read all records: TODO - query params for more control?
+// Read all records
 const readAllRecords = (Model: any) =>
   catchAsync(async (req, res, next) => {
     // Find all records

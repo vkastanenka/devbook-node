@@ -46,13 +46,6 @@ const searchDevbook = catchAsync(
       },
     })
 
-    if (!users?.length) {
-      throw new AppError({
-        message: `Results not found!`,
-        statusCode: HttpStatusCode.NOT_FOUND,
-      })
-    }
-
     // Respond
     new AppResponse({
       data: users,

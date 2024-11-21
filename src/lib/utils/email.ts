@@ -1,35 +1,6 @@
 // utils
 import nodemailer from 'nodemailer'
-
 import { convert } from 'html-to-text'
-
-/**
- * TODO
- * 
- * Update implementation in prod
- */
-
-const createTransport = () => {
-  if (process.env.NODE_ENV === 'production') {
-    // Sendgrid in prod
-    return nodemailer.createTransport({
-      service: 'SendGrid',
-      auth: {
-        user: process.env.SENDGRID_USERNAME,
-        pass: process.env.SENDGRID_PASSWORD,
-      },
-    })
-  }
-
-  // Gmail in dev
-  return nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USERNAME,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-  })
-}
 
 export const sendEmail = async (data: {
   to: string
@@ -37,14 +8,20 @@ export const sendEmail = async (data: {
   html: string
   text: string
 }) => {
-  // Create transport
-  const transport = createTransport()
-
   // Define email options
   const mailOptions = {
-    from: process.env.EMAIL_FROM,
+    from: process.env.EMAIL_FROM || 'vkastanenka@gmail.com',
     ...data,
   }
+
+  // Create transport
+  const transport = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USERNAME,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+  })
 
   // Send email
   await transport.sendMail(mailOptions)

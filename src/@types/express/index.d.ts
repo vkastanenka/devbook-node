@@ -10,8 +10,8 @@ interface CurrentUser extends PrismaUser {
 
 declare module 'express-serve-static-core' {
   interface Request {
-    errors: { [key: string]: string }
     currentUser?: CurrentUser
+    errors: { [key: string]: string }
     requestTime: Date
   }
 }
