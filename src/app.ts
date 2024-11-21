@@ -51,7 +51,7 @@ const limiter = rateLimit({
 })
 
 // Will now have X-RateLimit-Limit and X-RateLimit-Remaining headers
-// app.use('/api', limiter)
+app.use('/api', limiter)
 
 // Body parser, reading data from req.body
 app.use(express.json({ limit: '10kb' }))
