@@ -30,8 +30,10 @@ const app = express()
 //////////////
 // Middleware
 
-// Development logging
-app.use(morgan('dev'))
+// Logging
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'))
+}
 
 // Implementing CORS
 app.use(cors())

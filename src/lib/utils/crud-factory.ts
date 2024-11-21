@@ -33,14 +33,6 @@ const readRecord = (Model: any) =>
       ...(req.body ? req.body : {}),
     })
 
-    // If no record, respond with an error
-    if (!record) {
-      throw new AppError({
-        message: 'Record not found!',
-        statusCode: HttpStatusCode.NOT_FOUND,
-      })
-    }
-
     // Respond
     new AppResponse({
       data: record,
