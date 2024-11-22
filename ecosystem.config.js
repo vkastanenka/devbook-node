@@ -1,4 +1,4 @@
-modules.exports = {
+export default {
   apps: [
     {
       name: 'devbook',
