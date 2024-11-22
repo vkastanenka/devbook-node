@@ -2,11 +2,9 @@ export default {
   apps: [
     {
       name: 'devbook',
-      script: 'npm',
-      args: 'run dev',
+      script: './dist/src/server.js',
       env: {
         NODE_ENV: 'development',
-        ENV_VAR1: 'environment-variable',
       },
     },
   ],
