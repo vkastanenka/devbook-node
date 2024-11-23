@@ -27,20 +27,6 @@ export const sendEmail = async (data: {
   await transport.sendMail(mailOptions)
 }
 
-export const sendEmailVerification = async (data: {
-  to: string
-  url: string
-}) => {
-  const html = `<div><h1>Click the link below to verify your email.</h1><a href='${data.url}'>Verify your email.</a></div>`
-
-  await sendEmail({
-    to: data.to,
-    subject: 'Welcome to Devbook!',
-    html,
-    text: convert(html),
-  })
-}
-
 export const sendResetPasswordTokenEmail = async (data: {
   to: string
   url: string

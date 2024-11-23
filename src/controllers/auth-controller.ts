@@ -191,8 +191,8 @@ const authSendResetPasswordToken = catchAsync(
     })
 
     try {
-      // Send an email with a link to a form to reset the user's password (TODO: Update URL when live)
-      const resetPasswordUrl = `http://localhost:3000/reset-password/?token=${tokenHashed}`
+      // Send an email with a link to a form to reset the user's password
+      const resetPasswordUrl = `${process.env.FRONTEND_URL}/reset-password/?token=${tokenHashed}`
       await sendResetPasswordTokenEmail({
         to: user.email,
         url: resetPasswordUrl,
