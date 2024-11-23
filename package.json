@@ -17,7 +17,7 @@
   "description": "",
   "dependencies": {
     "@vkastanenka/devbook-prisma": "^0.0.3",
-    "@vkastanenka/devbook-validation": "^0.0.6",
+    "@vkastanenka/devbook-validation": "^0.0.7",
     "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",
     "concurrently": "^9.0.1",
