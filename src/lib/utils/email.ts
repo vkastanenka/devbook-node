@@ -27,6 +27,7 @@ export const sendEmail = async (data: {
   await transport.sendMail(mailOptions)
 }
 
+// Sends reset password token email
 export const sendResetPasswordTokenEmail = async (data: {
   to: string
   url: string
