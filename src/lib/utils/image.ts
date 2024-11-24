@@ -1,13 +1,20 @@
 // utils
+import AWS from 'aws-sdk'
 import sharp from 'sharp'
 import multer from 'multer'
-import { s3 } from './aws'
 import { catchAsync } from '../error/catch-async'
 
 // types
 import { Request } from 'express'
 import { AppError } from '../error/app-error'
 import { HttpStatusCode } from '@vkastanenka/devbook-types'
+
+// update aws config
+AWS.config.update({
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+})
 
 // Store the file in memory as a Buffer object
 const multerStorage = multer.memoryStorage()
@@ -38,6 +45,8 @@ export const resizeUserImage = catchAsync(async (req: Request, res, next) => {
   if (!req.file || !req.currentUser) return next()
 
   try {
+    const s3 = new AWS.S3()
+
     // Need to define filename property to save to database
     req.file.filename = `user-${req.currentUser.id}-${Date.now()}.jpeg`
 
