@@ -56,8 +56,18 @@ A social media backend built with Node.js 22+ and hosted on Amazon AWS. Create a
 ## <a name="network-architecture">💻 Network Architecture</a>
 
 <div align="center">
-    <img src="public/network-architecture.png" alt="devbook-network-architecture" />
+  <img src="public/network-architecture.png" alt="devbook-network-architecture" />
 </div>
+
+- Devbook backend and database hosted on Amazon VPC.
+- VPC has two subnets: public and private.
+- Private subnets have only local routes, so cannot communicate with any requests outside of cloud.
+- Public subnet has internet gateway route, giving the cloud a public access point.
+- Backend hosted with EC2. Located in public subnet.
+- Database hosted with RDS. Located in private subnet.
+- Each has security group rules allowing certain requests.
+- Next.js frontend hosted on Vercel communicates with internet gateway to gain access to cloud data.
+- User images stored on S3, viewed in frontend.
 
 ## <a name="links">🔗 Links</a>
 
