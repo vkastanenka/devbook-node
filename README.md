@@ -9,7 +9,7 @@
 1. 🤖 [Introduction](#introduction)
 2. ⚙️ [Tech Stack](#tech-stack)
 3. 🔋 [Features](#features)
-4  💻 [Network Architecture](#network-architecture)
+4. 💻 [Network Architecture](#network-architecture)
 5. 🔗 [Links](#links)
 
 ## <a name="introduction">🤖 Introduction</a>
