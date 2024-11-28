@@ -1,4 +1,5 @@
 // utils
+import dotenv from 'dotenv'
 import sharp from 'sharp'
 import multer from 'multer'
 import { catchAsync } from '../error/catch-async'
@@ -14,6 +15,8 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { Request } from 'express'
 import { AppError } from '../error/app-error'
 import { HttpStatusCode } from '@vkastanenka/devbook-types'
+
+dotenv.config()
 
 const bucketName = process.env.AWS_BUCKET_NAME || ''
 const region = process.env.AWS_BUCKET_REGION || ''
