@@ -6,6 +6,7 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  ObjectCannedACL,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
@@ -72,6 +73,7 @@ export const resizeUserImage = catchAsync(async (req: Request, res, next) => {
       Key: req.file.filename,
       Body: photo,
       ContentType: req.file.mimetype,
+      ACL: 'public-read' as ObjectCannedACL,
     }
 
     // Store the image in S3
