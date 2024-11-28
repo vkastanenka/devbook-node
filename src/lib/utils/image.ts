@@ -1,13 +1,31 @@
 // utils
 import sharp from 'sharp'
 import multer from 'multer'
-import { s3 } from './aws'
 import { catchAsync } from '../error/catch-async'
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 // types
 import { Request } from 'express'
 import { AppError } from '../error/app-error'
 import { HttpStatusCode } from '@vkastanenka/devbook-types'
+
+const bucketName = process.env.AWS_BUCKET_NAME || ''
+const region = process.env.AWS_BUCKET_REGION || ''
+const accessKeyId = process.env.AWS_ACCESS_KEY || ''
+const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY || ''
+
+const s3Client = new S3Client({
+  region,
+  credentials: {
+    accessKeyId,
+    secretAccessKey,
+  },
+})
 
 // Store the file in memory as a Buffer object
 const multerStorage = multer.memoryStorage()
@@ -54,13 +72,15 @@ export const resizeUserImage = catchAsync(async (req: Request, res, next) => {
       Key: req.file.filename,
       Body: photo,
       ContentType: req.file.mimetype,
-      ACL: 'public-read',
     }
 
     // Store the image in S3
-    const result = await s3.upload(params).promise()
+    await s3Client.send(new PutObjectCommand(params))
 
-    req.file.destination = result.Location
+    // Get url and assign so can be stored in user table
+    const url = await getObjectSignedUrl(req.file.filename)
+
+    req.file.destination = url.split('?')[0]
   } catch (err) {
     throw new AppError({
       errors: err as { [key: string]: string },
@@ -71,3 +91,17 @@ export const resizeUserImage = catchAsync(async (req: Request, res, next) => {
 
   next()
 })
+
+export async function getObjectSignedUrl(key: string) {
+  const params = {
+    Bucket: bucketName,
+    Key: key,
+  }
+
+  // https://aws.amazon.com/blogs/developer/generate-presigned-url-modular-aws-sdk-javascript/
+  const command = new GetObjectCommand(params)
+  const seconds = 60
+  const url = await getSignedUrl(s3Client, command, { expiresIn: seconds })
+
+  return url
+}
