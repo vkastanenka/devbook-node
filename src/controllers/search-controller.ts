@@ -1,7 +1,6 @@
 // utils
 import prisma from '../lib/db'
 
-import { AppError } from '../lib/error/app-error'
 import { AppResponse } from '../lib/utils/app-response'
 import { catchAsync } from '../lib/error/catch-async'
 

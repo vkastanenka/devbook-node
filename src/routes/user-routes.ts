@@ -9,7 +9,6 @@ import prisma from '../lib/db'
 
 import { protect } from '../lib/auth/protect'
 import { restrict } from '../lib/auth/restrict'
-import { uploadSingleImage, resizeUserImage } from '../lib/utils/image'
 
 // types
 import { UserRole } from '@vkastanenka/devbook-prisma'
@@ -69,16 +68,6 @@ router.patch(
   validateCurrentUserRecordOwnership({ idField: 'id', model: prisma.user }),
   validateReqBody({ schema: userUpdateUserReqBodySchema }),
   userController.userUpdateUser
-)
-
-// @route   PATCH api/v1/users/current-user/upload-photo
-// @desc    Uploads image to s3 and sets object url in user table
-// @access  Protected
-router.patch(
-  '/current-user/upload-image',
-  uploadSingleImage,
-  resizeUserImage,
-  userController.userUpdateCurrentUserImage
 )
 
 // @route   POST api/v1/users/current-user/toggle-contact/:id
