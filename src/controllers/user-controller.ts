@@ -188,6 +188,30 @@ const userToggleContact = catchAsync(
   }
 )
 
+const userUpdateCurrentUserImage = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.file && req.file.destination && req.currentUser) {
+      const updatedCurrentUser = await prisma.user.update({
+        where: {
+          id: req.currentUser.id,
+        },
+        data: {
+          image: req.file.destination,
+        },
+      })
+
+      // Respond
+      new AppResponse({
+        data: updatedCurrentUser,
+        message: 'Updated record!',
+        res,
+        statusCode: HttpStatusCode.OK,
+      }).respond()
+      return
+    }
+  }
+)
+
 // User
 const userCreateUser = crudFactory.createRecord(prisma.user)
 const userReadUser = crudFactory.readRecord(prisma.user)
@@ -215,6 +239,7 @@ export const userController = {
   userReadCurrentUser,
   userReadCurrentUserFeed,
   userToggleContact,
+  userUpdateCurrentUserImage,
   userCreateUser,
   userReadUser,
   userReadAllUsers,
