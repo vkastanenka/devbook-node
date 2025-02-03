@@ -128,17 +128,17 @@ export const globalErrorHandler = (
   err.status = err.status || "error";
   err.statusCode = err.statusCode || 500;
 
-  // // Prisma error handling
-  // if (err instanceof Prisma.PrismaClientKnownRequestError) {
-  //   console.log("Prisma client known request error!");
-  //   err = handlePrismaClientKnownRequestError(err, req, res, next);
-  // }
+  // Prisma error handling
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    console.log("Prisma client known request error!");
+    err = handlePrismaClientKnownRequestError(err, req, res, next);
+  }
 
-  // // Prisma error handling
-  // if (err instanceof Prisma.PrismaClientValidationError) {
-  //   console.log("Prisma client validation error!");
-  //   err = handlePrismaClientValidationError(err, req, res, next);
-  // }
+  // Prisma error handling
+  if (err instanceof Prisma.PrismaClientValidationError) {
+    console.log("Prisma client validation error!");
+    err = handlePrismaClientValidationError(err, req, res, next);
+  }
 
   // Zod error handling
   if (err instanceof ZodError) {

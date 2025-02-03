@@ -1,4 +1,4 @@
-import { User as PrismaUser } from '@vkastanenka/devbook-prisma'
+import { User as PrismaUser } from '@prisma/client'
 import { Request } from 'express'
 
 // Path aliases https://dev.to/larswaechter/path-aliases-with-typescript-in-nodejs-4353
