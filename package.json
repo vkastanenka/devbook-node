@@ -14,6 +14,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.741.0",
+    "@aws-sdk/s3-request-presigner": "^3.741.0",
     "@prisma/client": "^6.3.0",
     "@vkastanenka/devbook-prisma": "^0.0.3",
     "@vkastanenka/devbook-validation": "^0.0.7",
@@ -29,7 +31,9 @@
     "html-to-text": "^9.0.5",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
-    "nodemailer": "^6.10.0"
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.10.0",
+    "sharp": "^0.33.5"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -40,6 +44,7 @@
     "@types/html-to-text": "^9.0.4",
     "@types/jsonwebtoken": "^9.0.8",
     "@types/morgan": "^1.9.9",
+    "@types/multer": "^1.4.12",
     "@types/node": "^22.13.0",
     "@types/nodemailer": "^6.4.17",
     "@vkastanenka/devbook-types": "^0.0.4",
