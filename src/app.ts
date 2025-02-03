@@ -11,6 +11,13 @@ import rateLimit from "express-rate-limit";
 import { AppError } from "./lib/error/app-error";
 import { globalErrorHandler } from "./lib/error/global-error-handler";
 
+// routes
+import { addressRouter } from "./routes/address-routes";
+import { authRouter } from "./routes/auth-routes";
+import { searchRouter } from "./routes/search-routes";
+import { postRouter } from "./routes/post-routes";
+import { userRouter } from "./routes/user-routes";
+
 // types
 import { HttpStatusCode } from "@vkastanenka/devbook-types/dist";
 
@@ -56,6 +63,11 @@ app.use(
   })
 );
 
+// Catch favicon requests from browser
+app.get("/favicon.ico", (req: Request, res: Response) => {
+  res.status(204);
+});
+
 // Compression of text sent to clients.
 app.use(compression());
 
@@ -80,6 +92,13 @@ app.get("/", (req: Request, res: Response) => {
     .json({ message: "Welcome to the Devbook API!", status: "Success!" });
 });
 
+// Use routes
+app.use("/api/v1/addresses", addressRouter);
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/search", searchRouter);
+app.use("/api/v1/posts", postRouter);
+app.use("/api/v1/users", userRouter);
+
 //////////////////
 // Error Handling
 
@@ -95,6 +114,9 @@ app.all("*", (req, res, next) => {
 
 // Global error handling
 app.use(globalErrorHandler);
+
+/////////////////
+// Launch Server
 
 const server = app.listen(port, () => {
   console.log(`Server listening on port: ${port}`);
