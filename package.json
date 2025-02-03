@@ -5,13 +5,17 @@
   "scripts": {
     "build": "npx tsc",
     "start": "npm run build && node dist/app.js",
-    "dev": "nodemon src/app.ts"
+    "dev": "nodemon src/app.ts",
+    "prisma-generate": "npx prisma generate --schema=node_modules/@vkastanenka/devbook-prisma",
+    "prisma-migrate": "npx prisma migrate dev --schema=node_modules/@vkastanenka/devbook-prisma"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@vkastanenka/devbook-prisma": "^0.0.3",
+    "@vkastanenka/devbook-validation": "^0.0.7",
     "compression": "^1.7.5",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -28,6 +32,7 @@
     "@types/hpp": "^0.2.6",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.13.0",
+    "@vkastanenka/devbook-types": "^0.0.4",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"

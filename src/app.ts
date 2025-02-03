@@ -8,6 +8,12 @@ import hpp from "hpp";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 
+import { AppError } from "./lib/error/app-error";
+import { globalErrorHandler } from "./lib/error/global-error-handler";
+
+// types
+import { HttpStatusCode } from "@vkastanenka/devbook-types/dist";
+
 dotenv.config();
 
 const app = express();
@@ -65,9 +71,30 @@ app.use((req, res, next) => {
   next();
 });
 
+///////////
+// Routing
+
 app.get("/", (req: Request, res: Response) => {
-  res.status(200).json({ status: "success!" });
+  res
+    .status(200)
+    .json({ message: "Welcome to the Devbook API!", status: "Success!" });
 });
+
+//////////////////
+// Error Handling
+
+// Handling unknown routes
+app.all("*", (req, res, next) => {
+  next(
+    new AppError({
+      message: `Can't find ${req.originalUrl} on this server!`,
+      statusCode: HttpStatusCode.NOT_FOUND,
+    })
+  );
+});
+
+// Global error handling
+app.use(globalErrorHandler);
 
 const server = app.listen(port, () => {
   console.log(`Server listening on port: ${port}`);
